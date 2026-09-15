@@ -1,6 +1,6 @@
 # g6 · Timing System (Timers/PWM)
 
-Inside the RZ/V2H SoC (system on chip, cramming the processor, memory controller, and every kind of peripheral into a single chip), there's more than one kind of "time-counting" hardware. The official hardware manual groups them all together under SECTION 5 TIMER, and this group maps to that entire section: the system time base, the watchdog, the general timer, the compare match timer, the general-purpose timer (also the only one that can output PWM waveforms), PWM output gating, and the realtime clock.
+Inside the RZ/V2H SoC (system-on-chip, cramming the processor, memory controller, and every kind of peripheral into a single chip), there's more than one kind of "time-counting" hardware. The official hardware manual groups them all together under SECTION 5 TIMER, and this group maps to that entire section: the system time base, the watchdog, the general timer, the compare match timer, the general-purpose timer (also the only one that can output PWM waveforms), PWM output gating, and the realtime clock.
 
 At first you might think "why are there so many timers," but the division of labor is actually pretty clear. Here's the skeleton of the whole group in one picture:
 
@@ -22,7 +22,7 @@ RZ/V2H Timing System: Three Roles
 └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-This picture also flags the two things you most need to remember about this group: **(1)** the first three (SYC/GTM/CMTW) are system-level time-base supplies — your program can only use them indirectly through the standard Linux time APIs, there's no interface for "pick a specific channel on a specific one"; **(2)** the ones the application actually wants to touch directly are the last four — but the most sought-after of them, PWM output, happens to have no ready-made driver in this board's Linux userspace (the rest of this document goes unit by unit through exactly what's missing and what the alternative paths are).
+This picture also flags the two things you most need to remember about this group: **(1)** the first three (SYC/GTM/CMTW) are system-level time-base supplies — your program can only use them indirectly through the standard Linux time APIs; there's no interface for "pick a specific channel on a specific one"; **(2)** the ones the application actually wants to touch directly are the last four — but the most sought-after of them, PWM output, happens to have no ready-made driver in this board's Linux userspace (the rest of this document goes unit by unit through exactly what's missing and what the alternative paths are).
 
 ## Units in This Group
 
@@ -44,9 +44,9 @@ This picture also flags the two things you most need to remember about this grou
 
 ### What This Is (the Mechanism)
 
-SYC is a "time-base supply" unit — it doesn't expose any operating interface to the application layer itself; its role is to generate a **shared, stable count value** for two downstream consumers: one is the Cortex-A55's built-in generic timer (the standard Arm architectural timer — this is also the hardware source of `arch_timer` in Linux; "generic timer" is Arm's umbrella term for the set of timer registers built into every application core), and the other is GE3D (the 3D graphics engine on this SoC). (r01uh1032 §5.2 overview)
+SYC is a "time-base supply" unit: it doesn't itself expose any operating interface to the application layer. Its role is to generate a **shared, stable count value** for two downstream consumers. One is the Cortex-A55's built-in generic timer — the standard Arm architectural timer, and also the hardware source of `arch_timer` in Linux ("generic timer" is Arm's umbrella term for the set of timer registers built into every application core). The other is GE3D (the 3D graphics engine on this SoC). (r01uh1032 §5.2 overview)
 
-The way it generates its count is by borrowing the timestamp generator inside Arm CoreSight SoC-400 (CoreSight is Arm's debug/trace infrastructure) to produce a raw count, and SYC then converts that count into **Gray code** (a binary encoding where adjacent values differ by only one bit, used to avoid sampling errors from multiple bits flipping at once when sampling across clock domains) for output. The Manual's block diagram (Figure 5.2-2) draws this path as Time Stamp Generator → BIN2GLAY → Count output. (r01uh1032 §5.2.1.2)
+It generates its count by borrowing the timestamp generator inside Arm CoreSight SoC-400 (CoreSight is Arm's debug/trace infrastructure) to produce a raw count. SYC then converts that count into **Gray code** for output — a binary encoding where adjacent values differ by only one bit, used to avoid sampling errors from multiple bits flipping at once when sampling across clock domains. The Manual's block diagram (Figure 5.2-2) draws this path as Time Stamp Generator → BIN2GLAY → Count output. (r01uh1032 §5.2.1.2)
 
 The clock source for counting is a 24 MHz `SYC_0_CNT_CLK`. (r01uh1032 §5.2.1.1 Features)
 
@@ -59,14 +59,14 @@ Pulling all this together into one sentence: SYC is the system-level time-base s
 Honestly, you almost **never see SYC itself** from userspace. This needs to be said plainly, because it's the one unit in this group that the development notes never separately inventoried:
 
 - The development notes (the hardware unit usage guide, 49 numbered units across the whole document) **don't list SYC separately** — it's one of the gaps this resource map honestly flags, not an existing conclusion.
-- The only indirect clue available is the interrupt list: `arch_timer` is active in `/proc/interrupts` (doc06 §3; on this board, ✅ 2026-07-17, re-running `cat /proc/interrupts` on the board confirmed `arch_timer` was indeed ticking, transcript: live/ch04-followup.txt). `arch_timer` being active means the A55's generic timer (whose count source is SYC) is indeed running — but this is an **inference**, not a direct inventory of SYC itself.
+- The only indirect clue available is the interrupt list: `arch_timer` is active in `/proc/interrupts` (doc06 §3; ✅ Verified on the board with `cat /proc/interrupts`: `arch_timer` is ticking; transcript: live/ch04-followup.txt). `arch_timer` being active means the A55's generic timer (whose count source is SYC) is indeed running — but this is an **inference**, not a direct inventory of SYC itself.
 - There's no `/dev` node, and no sysfs control interface (sysfs is the virtual filesystem the kernel uses to expose device state as files under `/sys`). The only verification you can do is this one indirect line:
 
 ```bash
 cat /proc/interrupts | grep arch_timer
 ```
 
-What this confirms is whether the generic timer interrupt downstream of SYC is active — **not** a direct read of SYC's 64-bit count value. There is no way for userspace to directly read that count, nor can it access SYC's `PSELCTRL`/`PSELREAD` registers.
+What this confirms is whether the generic-timer interrupt downstream of SYC is active — **not** a direct read of SYC's 64-bit count value. There is no way for userspace to directly read that count, nor can it access SYC's `PSELCTRL`/`PSELREAD` registers.
 
 > ⚠️ **Note (don't cite an "inference" as if it were a "measurement")**:
 > - **Scenario**: you want to write, in a document or report, "this board's SYC has been verified enabled, at 24 MHz."
@@ -91,7 +91,7 @@ The most important line on the limits side: it has no userspace interface. The a
 
 **Decision rule**: ordinary application development never needs to, and can't, program SYC directly. Whether it's sensor polling, control-loop scheduling, or any situation where you need to measure "how much time has elapsed," going through the standard Linux time API means you're already sharing this SYC time base. The only situation where you'll actually "touch" SYC's own characteristics is CoreSight debugging/tracing, when you need A55 and GE3D to freeze their counts synchronously at a breakpoint — that's when Halt on Debug comes into play, and ordinary application development never gets down to that layer.
 
-**Take an industrial inspection camera as an example**: whether you're timestamping every frame, or a real-time control loop needs to measure its period, as long as you're going through the standard Linux time API, you're sharing SYC at the mechanism level — this isn't a choice made for any particular application; swap in a different application domain and the conclusion is identical.
+**Take an industrial inspection camera as an example**: whether you're timestamping every frame or a realtime control loop needs to measure its period, going through the standard Linux time API means you're sharing SYC at the mechanism level. This isn't a choice made for any particular application — swap in a different application domain and the conclusion is identical.
 
 > Source: the official hardware manual r01uh1032 **§5.2 System Counter (SYC)** (p1162–1163 overview; registers from §5.2.2, p1164). Board status is inferred from doc06 (`06-hardware-resource-map.md`) §3's `arch_timer` interrupt activity; SYC itself was never separately listed in the development notes (a gap).
 
@@ -207,12 +207,12 @@ ls /sys/devices/system/clocksource/
 
 **Decision rule**: if your application needs to "measure the precise time interval of an external signal" (**take a rotary encoder's pulse interval as an example**, or measuring when an external trigger signal arrives), you need to confirm two things first:
 
-1. Which pin the signal is actually wired to, and whether it lands on CMTW0–3's `TICn0`/`TICn1` — you'll need to check the schematic and the PFC's (Pin Function Controller, which decides what function a physical pin is currently switched to) pinmux settings to know this.
+1. Which pin the signal is actually wired to, and whether it lands on CMTW0–3's `TICn0`/`TICn1` — you'll need to check the schematic and the pinmux (pin multiplexing — one physical pin shared by several functions) settings in the PFC (Pin Function Controller, which decides what function a physical pin is currently switched to).
 2. Whether Linux has a corresponding driver — **currently it does not**.
 
 Without an existing kernel driver, CMTW's input capture capability falls into the category of "exists in silicon, unreachable from the Linux application layer." To actually use it, there are only two paths: write your own kernel driver, or switch to a realtime core (Cortex-R8/M33) firmware that operates the registers directly.
 
-**Take measuring the pulse period of an industrial sensor as an example**: going through the Linux application layer, this path simply doesn't work today; only once the real-time requirement is worth the development cost does it make sense to evaluate moving this kind of measurement work to realtime-core firmware that operates CMTW directly. This is a textbook example of "the capability exists, the decision comes down to cost versus benefit" — and it has nothing to do with which project you're working on.
+**Take measuring the pulse period of an industrial sensor as an example**: going through the Linux application layer, this path simply doesn't work today; only once the realtime requirement is worth the development cost does it make sense to evaluate moving this kind of measurement work to realtime-core firmware that operates CMTW directly. This is a textbook example of "the capability exists, the decision comes down to cost versus benefit" — and it has nothing to do with which project you're working on.
 
 > Source: the official hardware manual r01uh1032 **§5.6 Compare Match Timer W (CMTW)** (p1254–1255 overview; registers from §5.6.2, p1256). Development notes doc07 §20. Pin naming (`TICn0/1`, `TOCn0/1`, n = 0 to 3) also cross-checked against datasheet `r01ds0429` Section 2 pin function table.
 
@@ -239,8 +239,8 @@ What lets GPT produce "high-quality" power-control waveforms comes down to a few
 
 This is the one unit in this group that most needs to be stated plainly: **GPT has no usable operating path from this board's Linux userspace.**
 
-- **Board status (development notes)**: of the 16 `gpt@…` device tree nodes, only `gpt@13010000` (GPT0, covering ch0–7) is `okay`; the other 15 nodes are all `disabled` — and **no PWM chip is registered**. (unit-map g6; doc07 §18, verbatim: "No PWM chip is registered for it"; ✅ 2026-07-18, checked all 16 nodes on the board one by one and confirmed only `gpt@13010000` was `okay`, transcript: live/ch04b-dt-status.txt)
-- **No standard Linux PWM path**: the `/sys/class/pwm` directory exists but is empty — there's no `pwm-rzv2h`/`pwm-rzg2l` driver bound to `gpt@13010000`. Even though the DT node has its clock/reset probed, nothing is exposed to the application layer as a `/dev` node or sysfs control (doc07 §18, verbatim: "Effectively 'no Linux driver' for application use; counting/PWM must be driven bare-metal via MMIO"; ✅ 2026-07-17, measured on the board that `/sys/class/pwm` was empty (transcript: live/ch04-reserved-mem.txt)).
+- **Board status (development notes)**: of the 16 `gpt@…` device tree nodes, only `gpt@13010000` (GPT0, covering ch0–7) is `okay`; the other 15 nodes are all `disabled` — and **no PWM chip is registered**. (unit-map g6; doc07 §18, verbatim: "No PWM chip is registered for it"; ✅ Verified on the board — all 16 nodes confirmed, only `gpt@13010000` is `okay`; transcript: live/ch04b-dt-status.txt)
+- **No standard Linux PWM path**: the `/sys/class/pwm` directory exists but is empty — there's no `pwm-rzv2h`/`pwm-rzg2l` driver bound to `gpt@13010000`. Even though the DT node has its clock/reset probed, nothing is exposed to the application layer as a `/dev` node or sysfs control (doc07 §18, verbatim: "Effectively 'no Linux driver' for application use; counting/PWM must be driven bare-metal via MMIO"; ✅ Verified on the board: `/sys/class/pwm` is empty; transcript: live/ch04-reserved-mem.txt).
 - **How to confirm this**:
 
 ```bash
@@ -248,7 +248,7 @@ ls /sys/class/pwm        # directory exists but is empty -> confirms no pwmchip 
 ls -A /sys/class/pwm | wc -l    # should print 0
 ```
 
-- **The only remaining option**: use `devmem`/`mmap` under root to read/write the registers directly — that is, bare-metal MMIO (Memory-Mapped I/O, treating a hardware register as a directly readable/writable chunk of memory address space). Roughly, the flow is: first write the key `0xA5` to the `GTWP` register to lift write protection, then start counting with `GTSTR`; to actually output PWM you also need to set `GTIOR` (pin enable/level), `GTCR` (mode), `GTPR` (period), and `GTCCRA` (duty cycle), and switch the pin to the `GTIOCnA` function via the PFC — the kernel provides no helper functions for any of this. (doc07 §18/§24)
+- **The only remaining option**: use `devmem`/`mmap` under root to read/write the registers directly — that is, bare-metal MMIO (Memory-Mapped I/O, treating a hardware register as a directly readable/writable chunk of memory address space). Roughly, the flow is: first write the key `0xA5` to the `GTWP` register to lift write protection, then start counting with `GTSTR`. To actually output PWM you also need to set `GTIOR` (pin enable/level), `GTCR` (mode), `GTPR` (period), and `GTCCRA` (duty cycle), and switch the pin to the `GTIOCnA` function via the PFC. The kernel provides no helper functions for any of this. (doc07 §18/§24)
 
 > ⚠️ **Note (wanting standard Linux PWM and not finding it)**:
 > - **Scenario**: you want to use standard Linux PWM sysfs (`/sys/class/pwm`) to drive GPT for a servo output.
@@ -259,8 +259,20 @@ ls -A /sys/class/pwm | wc -l    # should print 0
 > ⚠️ **Note (the `PWM0`/`PWM1` silkscreen labels on the 40-pin header don't mean ready to use)**:
 > - **Scenario**: you see the 40-pin Raspberry Pi-compatible header's Pin32/33 silkscreened `PWM0`/`PWM1` (corresponding to `GPIO12`/`GPIO13`) and assume you can just plug in and get PWM out.
 > - **Symptom**: PWM can't be used directly.
-> - **Cause**: the device tree doesn't turn on PWM function for these two pins; and whether that silkscreen label really connects to GPT's `GTIOCnA`/`B` pins, or is just following Raspberry Pi's pin-naming convention, needs the PFC pinmux table or schematic to confirm — the development notes don't speculate on this mapping, they just record the header silkscreen as-is.
+> - **Cause**: the device tree doesn't turn on the PWM function for these two pins.
 > - **Prevention/Fix**: to use it you'd first have to modify the device tree to enable the pin function (source `04-hardware-quickref.md:112`), and confirm the pinmux really does route that pin to a GPT output. This is the same issue as "no PWM chip registered," just seen from a different angle.
+>
+> ✅ **The silkscreen half of this question is settled**: those pins really do land on GPT — the labels are not just borrowed Raspberry Pi naming.
+>   Cross-check `REN_WS125V2HRDKREFZ_MAH` p.10 (the port-pin net name of every header pin) against the SoC manual `r01uh1032`
+>   **Table 1.2-3 List of Multiplexed Functional Pins** (PDF p.118–127), pin by pin:
+>   - **Pin 32 (`PWM0`) = `PA4` → `GTIOC6A`**
+>   - **Pin 33 (`PWM1`) = `PA7` → `GTIOC7B`**
+>
+>   Renesas's own drone reference design ([`renesas-rdk/rzv2h_drone_px4`](https://github.com/renesas-rdk/rzv2h_drone_px4), `docs/HARDWARE.md`) annotates the same header on real hardware, and all four of its channels agree: pin 32 = GPT6A, pin 33 = GPT7B, pin 35 = GPT9A (`P96`), pin 31 = GPT10B (`P53`).
+>
+>   **The larger thing the same cross-check settles**: of the 40-pin header's 28 signal pins, **23 can be muxed to a `GTIOC` function** (the ones that cannot are the SPI6 group `P90`/`P91`/`P92`/`P93`, plus `PA0`). Because one `GTIOC` output can be routed to either of two pins while a pin can only carry one function at a time, the usable count is a bipartite maximum matching (the largest set of output↔pin pairings in which no output and no pin is used twice): **giving the whole header over to PWM yields at most 20 simultaneous outputs**; keeping every peripheral the reference design uses (GPS/telemetry/SBUS/LiDAR/I²C) still leaves **13**. (The project's PX4 integration notes, §8.2①, carry the pin-by-pin matching.)
+>
+>   ⚠️ Still open: **the RDK schematic is not in hand** (series resistors, level shifting, or an existing on-board load may rule out particular pins — p.10 of the board manual already shows the two I²C pins carrying 2.2 kΩ pull-ups R180/R181), and for 7 pins the "header pin number ↔ port pin" mapping is not yet pinned down. **Neither affects the counts above, but both have to be closed before you wire anything up.**
 
 ### Key Capabilities & Limits
 
@@ -272,7 +284,7 @@ ls -A /sys/class/pwm | wc -l    # should print 0
 | Clock source | `clks_gpt` and its `/2 /4 /8 /16 /32 /64 /256 /1024` dividers, or external trigger `GTETRGA`–`GTETRGH` | r01uh1032 §5.7.1.1 Table 5.7-2(1/2) |
 | Notable mechanisms | Double buffering, asymmetric PWM, dead-time generation, ADC conversion trigger, 13 interrupt sources | r01uh1032 §5.7.1.1 |
 | Register bases | `<GPT0_base>` = `0x1301_0000` (ch0–7), `<GPT1_base>` = `0x1302_0000` (ch8–15) | r01uh1032 §5.7.2 Table 5.7-4 |
-| Range usable on this board | Only `gpt@13010000` (GPT0 ch0–7) has DT `okay`; the other 15 nodes are `disabled`; **no PWM chip registered** | unit-map g6; doc07 §18; ✅ 2026-07-18, checked one by one on the board (transcript: live/ch04b-dt-status.txt) |
+| Range usable on this board | Only `gpt@13010000` (GPT0 ch0–7) has DT `okay`; the other 15 nodes are `disabled`; **no PWM chip registered** | unit-map g6; doc07 §18; ✅ Verified on the board (transcript: live/ch04b-dt-status.txt) |
 
 > ⚠️ **Note (separate the "theoretical silicon ceiling" from "what's actually usable on this board's Linux")**: the Manual is describing silicon-level capability (16 channels, 4 pins per channel); this board's device tree currently only has an `okay` node for GPT0 ch0–7, those 8 channels, and no PWM chip. When citing GPT's capability, be sure to keep these two layers separate — don't let the reader come away thinking 16 channels/64 outputs are all directly usable under this board's Linux.
 
@@ -283,9 +295,9 @@ ls -A /sys/class/pwm | wc -l    # should print 0
 **Decision rule**: if the application needs PWM output (**take motor control, servo drive, or LED dimming as examples**, or any scenario needing an adjustable-duty-cycle waveform), first answer "who's going to drive it":
 
 - Linux userspace currently has **no pwmchip**. If you insist on operating it from the Linux application layer, the only path is bare-metal MMIO under root privileges — the risk being there's no kernel protection mechanism, so it's easy to mis-write into a register region some other process might also be using.
-- If you need "realtime, low-latency PWM output tightly synchronized with other control loops" (**take motor inverter commutation as an example**), the more solid approach is to hand the entire GPT operation over to a core that isn't subject to Linux scheduling jitter (on this SoC, the Cortex-R8/M33 not claimed by Linux both qualify), rather than doing bare-metal operation from the Linux application layer.
+- If you need "realtime, low-latency PWM output tightly synchronized with other control loops" (**take motor inverter commutation as an example**), the more solid approach is to hand the entire GPT operation over to a core that isn't subject to Linux scheduling jitter. On this SoC, the Cortex-R8/M33 not claimed by Linux both qualify. That beats doing bare-metal operation from the Linux application layer.
 
-**Take motor control as an example**: when you need a precise duty cycle with low jitter, GPT's dead-time generation and double buffering are exactly the hardware-level capabilities designed for this kind of application (the mechanism); but "who drives it" still depends on the real-time requirement (the decision rule). **Take simple LED dimming as another example**: if you can tolerate Linux scheduling delay, bare-metal MMIO is workable too — it's just that you'll have to reconfigure the registers on every boot, since there's no persistence mechanism in the kernel for this. The difference between these two examples isn't "which project" — it's the real-time requirement, which is the decision rule; readers can apply the same line of reasoning to their own application.
+**Take motor control as an example**: when you need a precise duty cycle with low jitter, GPT's dead-time generation and double buffering are exactly the hardware-level capabilities designed for this kind of application (the mechanism); but "who drives it" still depends on the realtime requirement (the decision rule). **Take simple LED dimming as another example**: if you can tolerate Linux scheduling delay, bare-metal MMIO is workable too — it's just that you'll have to reconfigure the registers on every boot, since there's no persistence mechanism in the kernel for this. The difference between these two examples isn't "which project" — it's the realtime requirement, which is the decision rule; readers can apply the same line of reasoning to their own application.
 
 > Source: the official hardware manual r01uh1032 **§5.7 General-Purpose Timer (GPT)** (p1283–1287 overview; registers from §5.7.2, p1288). Development notes doc07 §18; pin naming (`GTIOCnA/B/AN/BN`, `GTETRGA-H`) also cross-checked against datasheet `r01ds0429` Section 2; 40-pin header silkscreen documented in `04-hardware-quickref.md` and the WS125 RDK carrier board manual.
 
@@ -295,7 +307,7 @@ ls -A /sys/class/pwm | wc -l    # should print 0
 
 ### What This Is (the Mechanism)
 
-Let's clear up the easiest concept to misunderstand first: **PWM is not a standalone peripheral on RZ/V2H.** The development notes explicitly state "PWM-output — NOT a standalone peripheral on RZ/V2H" — the logic that generates the PWM waveform lives entirely in GPT (§5.7), while POEG (§5.8) is only responsible for the layer that decides "should the output pin be allowed through or not." Together, the two form one complete PWM output chain. (doc07 §24; unit-map g6)
+Let's clear up the easiest concept to misunderstand first: **PWM is not a standalone peripheral on RZ/V2H.** The development notes explicitly state "PWM-output — NOT a standalone peripheral on RZ/V2H." The logic that generates the PWM waveform lives entirely in GPT (§5.7), while POEG (§5.8) is only responsible for the layer that decides "should the output pin be allowed through or not." Together, the two form one complete PWM output chain. (doc07 §24; unit-map g6)
 
 POEG (Port Output Enable for GPT) is not itself a timer and doesn't count — it's a **protective gate** on GPT's output pins: it can switch a GPT output pin to a disabled state. The reason it exists is "fail-safe": if a software bug ever drives the power stage into a dangerous state via PWM, POEG can cut the output at the hardware level immediately, without waiting for the CPU to react. (r01uh1032 §5.8.1)
 
@@ -309,15 +321,15 @@ It has noise filtering built in: for the `GTETRGn` input, you can select `PCLKB/
 
 POEG is split into 4 groups each for GPT0/GPT1, 8 groups total, each gating independently: POEG0A–D correspond to GPT0 (external pins `GTETRGA`–`D`), POEG1A–D (Manual pin naming `GTETRGE`–`H`) correspond to GPT1. (r01uh1032 §5.8.2 Table 5.8-3; §5.8.1 Table 5.8-2)
 
-On "how many PWM outputs at most": the development notes work out "4 I/O pins × 16 GPT channels = up to 64 PWM-capable outputs, gated by 8 POEG groups" (doc07 §24, verbatim: "up to 4 I/O pins x16 GPT channels = up to 64 PWM-capable outputs, gated by 8 POEG groups"). This figure of 64 is a **theoretical silicon ceiling worked out** from the official spec (4 pins per channel × 16 channels), consistent with §5.7.1.1's "Four input/output pins per channel" and the 16-channel spec — but it is **not a number measured on this board**; this board in practice only has the 8 channels of GPT0 ch0–7 with `okay` nodes (see the previous section).
+On "how many PWM outputs at most": the development notes work out "4 I/O pins × 16 GPT channels = up to 64 PWM-capable outputs, gated by 8 POEG groups" (doc07 §24, verbatim: "up to 4 I/O pins x16 GPT channels = up to 64 PWM-capable outputs, gated by 8 POEG groups"). This figure of 64 is a **theoretical silicon ceiling worked out** from the official spec (4 pins per channel × 16 channels), consistent with §5.7.1.1's "Four input/output pins per channel" and the 16-channel spec. It is **not a number measured on this board**: in practice this board only has the 8 channels of GPT0 ch0–7 with `okay` nodes (see the previous section).
 
 ### How You See This Under Linux
 
 Same as GPT — this board's Linux side has no path to it:
 
-- **No Linux driver**: there's neither a `pwm-rzv2h`/`pwm-rzg2l` pwmchip nor a POEG driver; `/sys/class/pwm` is empty. (doc07 §24, verbatim: "there is no pwm-rzv2h/pwm-rzg2l pwmchip and no POEG driver; /sys/class/pwm is absent"; ✅ 2026-07-17, measured on the board that `/sys/class/pwm` was empty (transcript: live/ch04-reserved-mem.txt))
+- **No Linux driver**: there's neither a `pwm-rzv2h`/`pwm-rzg2l` pwmchip nor a POEG driver; `/sys/class/pwm` is empty. (doc07 §24, verbatim: "there is no pwm-rzv2h/pwm-rzg2l pwmchip and no POEG driver; /sys/class/pwm is absent"; ✅ Verified on the board: `/sys/class/pwm` is empty; transcript: live/ch04-reserved-mem.txt)
 - **The full flow to use PWM**: program the GPT registers directly and switch the pin to the `GTIOCnA` function via the PFC, then, if needed, set the corresponding POEG group's `POEGGn` register (doc07 §24's usage example: writing `GTWP`/`GTPR`/`GTCCRA`/`GTIOR`/`GTSTR` directly with `devmem`).
-- **Recommended path**: the development notes' recommendation for "who should drive GPT + POEG for realtime PWM control" is to hand it to a realtime core not subject to Linux scheduling (on this board, that's Cortex-R8, though that core isn't exposed to Linux and would first need the remoteproc/firmware-loading path), rather than bare-metal operation from the Linux application layer. This is a general real-time-requirement judgment call, unrelated to any particular application project. (doc07 §24)
+- **Recommended path**: the development notes' recommendation for "who should drive GPT + POEG for realtime PWM control" is to hand it to a realtime core not subject to Linux scheduling (on this board, that's Cortex-R8, though that core isn't exposed to Linux and would first need the remoteproc/firmware-loading path — remoteproc being the Linux framework for loading and starting firmware on a co-processor), rather than bare-metal operation from the Linux application layer. This is a general realtime-requirement judgment call, unrelated to any particular application project. (doc07 §24)
 
 ### Key Capabilities & Limits
 
@@ -328,7 +340,7 @@ Same as GPT — this board's Linux side has no path to it:
 | Register per group | One 32-bit control register `POEG_POEGGn`, offset `0x0000` | r01uh1032 §5.8.2.1 |
 | Register bases | POEG0A = `0x1300_1C00`, 0B = `0x1300_2000`, 0C = `0x1300_2400`, 0D = `0x1300_2800`, POEG1A(E) = `0x1300_2C00`, 1B(F) = `0x1300_3000`, 1C(G) = `0x1300_3400`, 1D(H) = `0x1300_3800` | r01uh1032 §5.8.2 Table 5.8-3 |
 | Theoretical maximum outputs | Up to 64 PWM-capable outputs (4 pins × 16 channels, worked out from the official spec, **not measured on this board**) | doc07 §24 |
-| Board status | `/sys/class/pwm` is empty (no pwmchip, no POEG driver) | unit-map g6; doc07 §24; ✅ 2026-07-17, measured on the board (transcript: live/ch04-reserved-mem.txt) |
+| Board status | `/sys/class/pwm` is empty (no pwmchip, no POEG driver) | unit-map g6; doc07 §24; ✅ Verified on the board (transcript: live/ch04-reserved-mem.txt) |
 
 ### When You'd Actually Use This
 
@@ -339,7 +351,7 @@ Same as GPT — this board's Linux side has no path to it:
 - If the PWM output is simple signal generation (**take a servo motor position command or LED dimming as examples**) that doesn't involve a bridge-type power stage, whether to enable POEG's fault protection depends on whether you already have other protection measures in place.
 - If the PWM is driving a power circuit that "can be damaged by a short or simultaneous conduction" (**take an H-bridge motor drive or a DC/DC converter as examples**), POEG's "automatic output disable" is a hardware protection layer worth evaluating — its fundamental advantage over a purely software-based safeguard is that it doesn't go through the CPU, so it reacts faster.
 
-**Take motor control as an example**: the value of the hardware-level output disable POEG provides is that it can take effect the instant a fault occurs — that's the whole point of fail-safe design; but this board's Linux side currently has no driver at all to configure it, so actually using it means going down the same bare-metal MMIO or realtime-core path as GPT. When readers are evaluating their own application, the deciding line is: "can the power circuit my PWM drives be damaged by a malfunction?" If yes, factor this hardware protection layer, POEG, into your design.
+**Take motor control as an example**: the value of the hardware-level output disable POEG provides is that it can take effect the instant a fault occurs — that's the whole point of fail-safe design. But this board's Linux side currently has no driver at all to configure it, so actually using it means going down the same bare-metal MMIO or realtime-core path as GPT. When readers are evaluating their own application, the deciding line is: "can the power circuit my PWM drives be damaged by a malfunction?" If yes, factor this hardware protection layer, POEG, into your design.
 
 > Source: the official hardware manual r01uh1032 **§5.8 Port Output Enable for GPT (POEG)** (p1504–1505 overview; registers from §5.8.3) + **§5.7 GPT** (PWM waveform generation lives in GPT). Development notes doc07 §24.
 
@@ -349,15 +361,15 @@ Same as GPT — this board's Linux side has no path to it:
 
 ### What This Is (the Mechanism)
 
-WDT (Watchdog Timer) is a 14-bit down-counter whose role is "the last line of defense when the system loses control." When the system has run away and can no longer periodically "refresh" the counter, the counter counts all the way down to 0 (underflow), and WDT steps in — it can reset the entire chip, or instead be configured to generate an NMI (Non-Maskable Interrupt — the highest-priority interrupt, one that can't even be blocked by "disabling interrupts") or an underflow interrupt. (r01uh1032 §5.4.1, verbatim: "a 14-bit down counter that can be used to reset this LSI when the counter underflows because the system has run out of control and is unable to refresh the WDT. In addition, the WDT can be used to generate a non-maskable interrupt or an underflow interrupt")
+WDT (Watchdog Timer) is a 14-bit down-counter whose role is "the last line of defense when the system loses control." When the system has run away and can no longer periodically "refresh" the counter, the counter counts all the way down to 0 (underflow) and WDT steps in. It can reset the entire chip, or instead be configured to generate an NMI (Non-Maskable Interrupt — the highest-priority interrupt, one that can't even be blocked by "disabling interrupts") or an underflow interrupt. (r01uh1032 §5.4.1, verbatim: "a 14-bit down counter that can be used to reset this LSI when the counter underflows because the system has run out of control and is unable to refresh the WDT. In addition, the WDT can be used to generate a non-maskable interrupt or an underflow interrupt")
 
 This SoC has **4 independent WDT instances, each bound to a different core**: WDT0 is bound to CM33, WDT1 to CA55 (all A55 cores), WDT2 to CR8 core0, WDT3 to CR8 core1. Every processor core has its own dedicated watchdog, each independent of the others. (r01uh1032 §5.4.2 Table 5.4-2)
 
-The clock source for counting is **LOCO** (Low-speed On-Chip Oscillator — a not-especially-precise but self-contained oscillator that doesn't depend on any external component; precisely because it's independent, it's suited to being the time base for a watchdog that needs to "keep running even if the main clock itself has gone down"), with selectable dividers of `1/16/32/64/128/256`. (r01uh1032 §5.4.1 Table 5.4-1)
+The clock source for counting is **LOCO** (Low-speed On-Chip Oscillator), with selectable dividers of `1/16/32/64/128/256`. LOCO is a not-especially-precise but self-contained oscillator that doesn't depend on any external component. Precisely because it is independent, it suits being the time base for a watchdog that needs to "keep running even if the main clock itself has gone down." (r01uh1032 §5.4.1 Table 5.4-1)
 
 The way you "refresh" it (colloquially, "feeding the dog") is: within the refresh-permitted window, write `00h` and then write `FFh` to the `WDTRR` register, in that order. (r01uh1032 §5.4.2.2.1, verbatim: "The down-counter is refreshed by writing 00h and then writing FFh to WDTRR register (refresh operation) within the refresh-permitted period")
 
-WDT also has an advanced **window** feature: you can configure a time window of "refresh allowed" and "refresh forbidden" — refreshing too early or too late is both treated as a refresh error and triggers an interrupt. This is used to detect an anomaly like "the program fed the dog too early" — for example, some code path skipping work it was supposed to do but still refreshing on schedule. (r01uh1032 §5.4.1 Table 5.4-1) The timeout period is jointly determined by `CKS` (the divider) and `TOPS` (Timeout Period Select), where `TOPS` can select 1024/4096/8192/16384 "post-divider clock" cycles; the window's start position (`RPSS`) can be 25%/50%/75%/100% (100% meaning no restriction on the start), and its end position (`RPES`) can be 75%/50%/25%/0% (0% meaning no restriction on the end). (r01uh1032 §5.4.2.2.2)
+WDT also has an advanced **window** feature: you can configure a time window of "refresh allowed" and "refresh forbidden" — refreshing too early or too late is both treated as a refresh error and triggers an interrupt. This is used to detect an anomaly like "the program fed the dog too early" — for example, some code path skipping work it was supposed to do but still refreshing on schedule. (r01uh1032 §5.4.1 Table 5.4-1) The timeout period is jointly determined by `CKS` (the divider) and `TOPS` (Timeout Period Select), where `TOPS` can select 1024/4096/8192/16384 "post-divider clock" cycles. The window's start position (`RPSS`) can be 25%/50%/75%/100% (100% meaning no restriction on the start), and its end position (`RPES`) can be 75%/50%/25%/0% (0% meaning no restriction on the end). (r01uh1032 §5.4.2.2.2)
 
 ### How You See This Under Linux
 
@@ -372,6 +384,8 @@ wdctl                     # util-linux, query watchdog capabilities
 exec 3>/dev/watchdog0     # opening it arms it (starts the countdown)
 printf '1' >&3            # writing any byte = refresh (feed the dog)
 printf 'V' >&3; exec 3>&- # writing 'V' is the "magic close" — gracefully disarm, then close the fd
+# ⚠️ On this board MAGICCLOSE=0: writing 'V' has no effect and there is no clean disarm — see
+# the Hands-On section below, step 2 and its note box
 ```
 
 (doc07 §22 usage example)
@@ -394,6 +408,108 @@ printf 'V' >&3; exec 3>&- # writing 'V' is the "magic close" — gracefully disa
 | Core mapping and bases | `<WDT0_base>` = `0x11C0_0400` (CM33), `<WDT1_base>` = `0x1440_0000` (CA55), `<WDT2_base>` = `0x1300_0000` (CR8 Core0), `<WDT3_base>` = `0x1300_0400` (CR8 Core1) | r01uh1032 §5.4.2 Table 5.4-2 |
 | Linux exposure | Only WDT1 = `/dev/watchdog0` (`rzv2h_wdt`); WDT0/2/3 belong to their respective core's firmware | doc07 §22; unit-map g6 |
 
+### Hands-On: Open It and Feed It, Read Out the Timeout, and Watch It Actually Bite (Reset)
+
+This is one of the few units in this group where you can walk the **entire path** from Linux — arming it, feeding it, and letting it genuinely reset the whole board. And precisely because the last step **really does reboot the board**, think each step through before you run it.
+
+**Mechanism**: the Linux watchdog convention is that **the moment you open `/dev/watchdog0`, the countdown starts** (arming); from then on, writing any byte to that fd counts as one "refresh" (feeding the dog) and reloads the countdown; the only clean way to stop it is to write the magic close character `V` and then close the fd. On the hardware side this is exactly the `WDTRR` refresh and the underflow reset described in section 6: miss a feed, the counter reaches 0, and WDT1 reboots the chip through the **WDT → ICU → CPG reset chain** (see [g5-system-backbone-interrupts-clocks-power-dma-event-link.md](g5-system-backbone-interrupts-clocks-power-dma-event-link.md) §1, ICU).
+
+**Step 1: confirm the device is there — but don't touch `/dev/watchdog0` yet.** (✅ Verified on the board; transcript: `live/ch4-w1-wdt-pre.txt`)
+
+```bash
+ls -l /dev/watchdog*
+```
+
+```text
+crw------- 1 root root  10, 130 Jul 21 11:15 /dev/watchdog
+crw------- 1 root root 243,   0 Jul 21 11:15 /dev/watchdog0
+```
+
+Note that this **deliberately avoids `cat /dev/watchdog0` to "just take a look"** — merely opening it arms the watchdog and starts the countdown. The read-only way to inspect its capabilities would be `/sys/class/watchdog/watchdog0/`; on this board, however, the attribute files under there — `timeout`, `identity`, `state` and the rest — **do not exist at all** (each one gives a literal `No such file or directory`): this kernel was not built with the watchdog sysfs attributes. So **there is no path on this board that reads the timeout without arming the watchdog** — your only option is `wdctl` in the next step, which opens the device and therefore arms it too.
+
+**Step 2: read the capabilities with `wdctl` — knowing that this step has already let the dog out.** (✅ Verified on the board; transcript: `live/ch4-w1-wdt-bite.txt`)
+
+> ⚠️ **Note (the `wdctl` line below arms the watchdog the instant it opens the device; this board has no clean disarm, so it will reboot in about 60 seconds)**: to read the capabilities `wdctl` has to open `/dev/watchdog0`, and "opening arms it" is the general rule of the watchdog API; this board has `MAGICCLOSE=0` and no way to disarm cleanly partway through. Run that line and leave no process feeding the dog afterwards, and about 60 seconds later **the whole board** (every core, and everyone else's sessions and services) takes a hardware reboot. **A remote SSH session will drop, and on a shared board this affects other people.** Either be ready for the reboot, or immediately keep it fed with `exec 3>/dev/watchdog0; printf '1' >&3`.
+
+```bash
+sudo wdctl /dev/watchdog0
+```
+
+```text
+Device:        /dev/watchdog0
+Identity:      Renesas RZ/V2H WDT Watchdog [version 0]
+Timeout:       60 seconds
+Pre-timeout:    0 seconds
+FLAG           DESCRIPTION               STATUS BOOT-STATUS
+KEEPALIVEPING  Keep alive ping reply          1           0
+MAGICCLOSE     Supports magic close char      0           0
+SETTIMEOUT     Set timeout (in seconds)       0           0
+```
+
+Three hard facts about this board come straight out of that, and they decide how you can use it:
+
+- **The timeout is fixed at 60 seconds**, and the `SETTIMEOUT` flag is `0` — **this board does not support changing the timeout**, so 60 seconds is the value you have to live with.
+- `MAGICCLOSE` is `0` — **this board does not support magic close**. That means the "write `V` to gracefully disarm" line shown in "How You See This Under Linux" above **does not hold on this board** (the note box below spells it out).
+- `KEEPALIVEPING` is `1` — writing any byte does refresh it, so that part works. Feeding the dog is just: open an fd and write a byte periodically — `exec 3>/dev/watchdog0; printf '1' >&3` (but once you've opened it you're committed to feeding it; see below).
+
+**Step 3: let it actually bite (reset) — this reboots the board, so read before you run.** (✅ Verified on the board; transcripts: `live/ch4-w1-wdt-verify.txt`, `ch4-w1-wdt-bite.txt`, `ch4-w1-wdt-verify2.txt`)
+
+Arming it on purpose and then not feeding it means: open the fd, close it immediately, and send no magic close.
+
+> ⚠️ **This is a whole-machine reset, not just a restart of your process**: the line below makes **the entire board** (every core, every other user and service along with it) take a hardware reboot about 60 seconds later; your SSH/network session will drop, and on a shared board it affects other people. Make sure that is acceptable and that nobody else is using the board before you run it.
+
+```bash
+sudo sh -c '> /dev/watchdog0'    # opening arms it, closing doesn't disarm it -> hardware reset in 60 s
+```
+
+The moment you run it, the key line shows up in `dmesg`:
+
+```text
+watchdog: watchdog0: watchdog did not stop!
+```
+
+That line is the evidence: the fd was closed, but the watchdog **did not stop** (magic close isn't supported, and closing the fd doesn't disarm it) — it keeps counting down. About 60 seconds later the board resets in hardware. After reconnecting, verify against the boot time:
+
+```bash
+who -b ; awk '{print "uptime_sec="$1}' /proc/uptime
+```
+
+```text
+         system boot  2026-07-22 15:12
+uptime_sec=52.51
+```
+
+The time chain has to line up: **the moment you trigger it, plus the 60-second timeout, is when it bites — and that is the boot time `who -b` reports** (in the output above, triggered at 15:11:35 → bite around 15:12:35 → `who -b` showing 15:12). Once back up, confirm the device identity — that what bit really was WDT1, the instance bound to CA55 (transcript: `ch4-w1-wdt-verify2.txt`):
+
+```bash
+cat /sys/class/watchdog/watchdog0/device/uevent
+```
+
+```text
+DRIVER=rzv2h_wdt
+OF_NAME=watchdog
+OF_FULLNAME=/soc/watchdog@14400000
+OF_COMPATIBLE_0=renesas,r9a09g057-wdt
+```
+
+`OF_FULLNAME=/soc/watchdog@14400000` matches `<WDT1_base>` = `0x1440_0000` (CA55) in this section's capability table, with driver `rzv2h_wdt` — confirming that Linux's `/dev/watchdog0` is WDT1.
+
+**Pass criteria**:
+- What a successful bite looks like: after reconnecting, `/proc/uptime` is far smaller than the time you spent waiting for the board to come back (52.51 s above, against a much longer trigger-to-reconnect gap), and the `who -b` boot time ≈ trigger time + 60 s.
+- **The boot `dmesg` carries no reset-cause line** — the RZ/V2H BSP doesn't record the source of a reset. So "was it the watchdog?" is decided by the `watchdog did not stop!` line **from before the reboot** plus the time chain; don't expect the boot log to confess, and don't read "no reset-cause line" as "it didn't bite."
+
+> ⚠️ **Note (no magic close on this board: once opened, there's no clean way out)**
+> - **Scenario**: you only wanted to run `wdctl`, or open `/dev/watchdog0` briefly to look at it, or write `V` to turn it off again.
+> - **Symptom**: `dmesg` shows `watchdog: watchdog0: watchdog did not stop!`, and 60 seconds later the board reboots without warning.
+> - **Cause**: this board has `MAGICCLOSE=0` — writing `V` does not disarm it; and "opening arms it" is the general rule of the watchdog API, so even `wdctl` arms it just by opening the device to read its capabilities. Once it has been opened and no process keeps feeding it, it will bite.
+> - **Prevention/Fix**: treat `/dev/watchdog0` as a resource you are committed to feeding the moment you open it. Either hand it to systemd (set `RuntimeWatchdogSec=` in `/etc/systemd/system.conf` and let systemd feed it), or keep it open in your own process and refresh it periodically with `printf '1' >&3`. Don't open it just to "take a look." If you do arm it by accident and don't want to wait out a reboot, the only move is to start feeding it immediately and keep doing so — this board has no clean mid-flight disarm.
+
+> ⚠️ **Note (pick the timeout between two bounds — and on this board 60 seconds isn't adjustable)**
+> - **Scenario**: you hook `/dev/watchdog0` up to a long-running service and want to set a convenient timeout.
+> - **Symptom**: a refresh period longer than 60 seconds → normal execution gets falsely reset; and `wdctl -s` has no effect when you try to change the timeout.
+> - **Cause**: this board has `SETTIMEOUT=0`, so the timeout is locked at 60 seconds; and the timeout counts "how long since the last refresh, with no refresh since."
+> - **Prevention/Fix**: put the refresh period between "the time your main loop normally takes for one full pass" and "60 seconds," with plenty of margin (feeding every 20–30 seconds, for instance); a different timeout value has to come from firmware or the device tree — it isn't something Linux userspace can change.
+
 ### When You'd Actually Use This
 
 **Mechanism**: the watchdog's role is "the last line of defense when the system loses control" — when the main control loop hangs (deadlock, an infinite loop, or memory corruption causing the process to stop responding), and no other mechanism can recover the system automatically, WDT's timeout forces a chip reset.
@@ -404,7 +520,7 @@ printf 'V' >&3; exec 3>&- # writing 'V' is the "magic close" — gracefully disa
 - The refresh period should be set somewhere between "the time your main loop normally takes to run one full pass" and "the longest period of unresponsiveness you can tolerate" — too short causes false triggers, too long lets the system stay hung for too long before recovering.
 - The window feature is for detecting the anomaly of "refreshed too early"; ordinary applications that don't need this strict a timing check can just set the window start to 100% (no restriction on the start).
 
-**Which core owns the loop decides which path you take**: the Linux application layer (running on CA55) can hook directly into WDT1 via `/dev/watchdog0`; but if your real-time control loop runs on R8/M33, that core's own WDT (WDT2/WDT3 or WDT0) has to be **refreshed from within its own firmware** — Linux can neither manage it nor see its state. This decision rule follows directly from the mechanism of "4 WDTs, each bound to one core": whichever core your critical loop runs on, use that core's own WDT.
+**Which core owns the loop decides which path you take**: the Linux application layer (running on CA55) can hook directly into WDT1 via `/dev/watchdog0`; but if your realtime control loop runs on R8/M33, that core's own WDT (WDT2/WDT3 or WDT0) has to be **refreshed from within its own firmware** — Linux can neither manage it nor see its state. This decision rule follows directly from the mechanism of "4 WDTs, each bound to one core": whichever core your critical loop runs on, use that core's own WDT.
 
 > Source: the official hardware manual r01uh1032 **§5.4 Watchdog Timer (WDT)** (p1218–1219 overview; registers from §5.4.2, p1220). Development notes doc07 §22.
 
@@ -418,7 +534,7 @@ RTC (Realtime Clock) — this SoC's part is the RTCA-3. Its most fundamental dif
 
 It offers two counting modes, switched via a register (r01uh1032 §5.3.1):
 
-- **Calendar count mode**: a calendar spanning the 100 years from 2000–2099 CE, represented in BCD (Binary-Coded Decimal — every 4 bits represents one decimal digit, making it convenient to display year/month/day directly), with automatic handling of leap years and 12/24-hour switching.
+- **Calendar count mode**: a calendar spanning the 100 years from 2000 to 2099 CE, represented in BCD (Binary-Coded Decimal — every 4 bits represents one decimal digit, making it convenient to display year/month/day directly), with automatic handling of leap years and 12/24-hour switching.
 - **Binary count mode**: doesn't track year/month/day/hour/minute, just counts seconds as a 32-bit binary value, usable for non-Gregorian calendar contexts. (verbatim: "it counts seconds, and retains the information as a serial value. This mode can be used for calendars other than the Gregorian calendar")
 
 The clock source is a 32.768 kHz crystal oscillator (attached to the `RTXIN`/`RTXOUT` pins; 32.768 kHz is the RTC industry-standard frequency, being exactly 2 to the 15th power Hz, which makes it easy to divide down to 1 Hz), internally divided down to produce a 128 Hz reference clock. (r01uh1032 §5.3.1 Table 5.3-1; §5.3.2 Table 5.3-2)
@@ -434,7 +550,7 @@ All three of these events can be output directly to the ELC (without going throu
 ### How You See This Under Linux
 
 - **Device node `/dev/rtc0`**, driver binding name `rtca3` (the Renesas RTCA-3 binding), using the standard Linux RTC ioctl API (`RTC_RD_TIME`, `RTC_ALM_SET`, `RTC_WKALM_SET`, `RTC_AIE_ON`). (doc07 §23)
-- **Board status**: `hwclock -r` has been verified to work normally. (unit-map g6; doc07 §23)
+- **Board status**: `hwclock -r` works. (unit-map g6; doc07 §23)
 - **Tools and usage**:
 
 ```bash
@@ -464,6 +580,84 @@ rtcwake -d rtc0 -m mem -s 60      # sets an RTC alarm, suspends to RAM, auto-wak
 | Instance count | A single instance (unlike WDT/GTM, no multiple channels) | unit-map g6; doc07 §23 |
 | Linux exposure | `/dev/rtc0` (`rtca3`); `hwclock -r` works | doc07 §23; unit-map g6 |
 
+### Hands-On: Read the RTC, See How It Relates to the System Clock and to NTP, and What Happens After a Power Loss
+
+**Mechanism**: there are really two clocks running on this board — the **RTC** (`/dev/rtc0`, which remembers "what time it is now") and the **system clock** (maintained by the kernel: zeroed at boot, then advanced by the monotonic clock). They meet at two points: at boot the kernel reads the RTC once to seed the system time (`hctosys`), and after boot NTP (Network Time Protocol — here `systemd-timesyncd`) keeps correcting the system clock. The RTC takes no part in ordinary system timekeeping — it is only read or written at the boot and suspend/resume boundaries.
+
+**Step 1: confirm the device identity and `hctosys`.** (✅ Verified on the board; transcript: `live/ch4-w1-rtc.txt`)
+
+```bash
+cat /sys/class/rtc/rtc0/name
+grep -H . /sys/class/rtc/rtc0/date /sys/class/rtc/rtc0/time /sys/class/rtc/rtc0/hctosys
+```
+
+```text
+rtc-rtca3 11c00800.rtc
+/sys/class/rtc/rtc0/date:2026-07-22
+/sys/class/rtc/rtc0/time:07:06:45
+/sys/class/rtc/rtc0/hctosys:1
+```
+
+`rtc-rtca3 11c00800.rtc` matches `<RTC_base>` = `0x11C0_0800` in the capability table, confirming that `/dev/rtc0` is the SoC's built-in RTCA-3 (not the RTC inside the carrier board's PMIC — see the note box above in this section). `hctosys:1` is the key line: it means **the kernel used this RTC's time to set the system clock at boot** (hardware clock → system). Note also that sysfs `time` here is **UTC** (07:06:45), not local time.
+
+**Step 2: read it with `hwclock`/`timedatectl`, and see the division of labor between RTC and NTP.** (✅ Verified on the board; same transcript)
+
+```bash
+sudo hwclock -r          # /dev/rtc0 is root-only, mode 600, so sudo is required
+timedatectl
+```
+
+```text
+2026-07-22 15:06:46.002293+08:00
+```
+
+```text
+               Local time: Wed 2026-07-22 15:06:47 CST
+           Universal time: Wed 2026-07-22 07:06:47 UTC
+                 RTC time: Wed 2026-07-22 07:06:47
+                Time zone: Asia/Taipei (CST, +0800)
+System clock synchronized: no
+              NTP service: active
+          RTC in local TZ: no
+```
+
+Three things to read out of that together:
+
+- **`RTC in local TZ: no`** — the RTC stores UTC. So the `+08:00` local time that `hwclock -r` prints is the tool converting for you; what the hardware holds is UTC. This is the recommended Linux arrangement (RTC in UTC, time zone handled in software).
+- **`NTP service: active` while `System clock synchronized: no`** — these two lines don't contradict each other. The NTP service is running; it just hasn't marked the system as "synchronized" **at this moment**. Looking at the time-source status makes it obvious:
+
+```bash
+timedatectl timesync-status
+```
+
+```text
+       Server: 103.186.118.217 (tw.pool.ntp.org)
+Poll interval: 16h (min: 30min; max 1d)
+      Stratum: 2
+       Offset: +3.559ms
+```
+
+An offset of only +3.559 ms with the poll interval already stretched out to 16 hours is the normal quiet state after a successful sync has dropped into low-frequency polling — not a failure. **Don't read `synchronized: no` as "NTP is broken."**
+
+**Step 3: what happens to the RTC after a power loss — what holds on this board, and where the evidence stops.**
+
+First separate the two kinds of "reboot," which is where this is most often misjudged:
+
+- **Warm reset (power never drops)**: the watchdog bite from the previous unit, for example. The RTC domain stays powered throughout and the time is unaffected. This is verifiable: after a WDT-bite reboot, `date` comes straight back with the correct `Wed Jul 22 03:13:33 PM CST 2026` and nothing has jumped. (✅ Verified on the board; transcripts: `live/ch4-w1-wdt-bite.txt` for the bite, `live/ch4-w1-wdt-verify.txt` for the post-reboot reading.)
+- **Full power loss (supply removed)**: to keep counting while the board is dark, RTCA-3 needs **its own standby supply** (a battery or supercapacitor holding up the `RTXIN` crystal and the RTC domain). The reason the handbook's Chapter 1 setup insists on configuring NTP time sync ("Set the time zone and NTP time sync" states it plainly: the board has an RTC, but staying accurate depends on NTP) is exactly this: **this board's RTC cannot be treated as a time source you trust across a power cut** — once standby power is insufficient, the RTC drifts or zeroes while the board is off, and the boot timestamp is stale or wrong.
+
+> ⚠️ **Note (don't make the RTC your only trusted time source)**
+> - **Scenario**: you unplug the board to move it, power it back up, and immediately look at log timestamps — or do something that needs a correct time (**take certificate/TLS expiry validation as an example, or aligning data from several sources onto one timeline as another**).
+> - **Symptom**: early in the boot the time is a stale value or clearly off; log timestamps don't line up, and certificate validation may fail because of the wrong time.
+> - **Cause**: with no adequate standby supply this board's RTC doesn't count while the power is off; at boot, `hctosys` faithfully copies whatever the RTC currently holds (possibly wrong) into the system clock, and NTP only pulls it back once the network is up and a round has completed.
+> - **Prevention/Fix**: always have the boot flow rely on NTP for time (already set up in Chapter 1); once NTP has settled, write the correct system time **back** into the RTC with `sudo hwclock -w` so the next (warm) boot starts from a good value. If you genuinely need "keeps time across a power cut," confirm for yourself that the carrier board's RTC standby supply (battery or supercapacitor) is actually fitted and working.
+
+**Evidence boundary**: the first-hand evidence on this board covers only the warm-reset case — time still correct after a WDT bite. The destructive test, pulling the power completely and measuring whether the RTC readback has zeroed, is **not covered here**, so "what value this board's RTC comes back with after a full power loss" stands as **pending first-hand evidence (full power-cycle readback)**. The guidance above is anchored in the mechanism (standby power is the precondition for keeping time) and in the Chapter 1 setup fact that staying accurate depends on NTP; it does not overreach into claiming a measured zeroed value.
+
+**Pass criteria**:
+- Steps 1 and 2 done right look like: `/sys/class/rtc/rtc0/name` contains `rtca3` and `hctosys` is `1`; `timedatectl`'s `RTC time` is close to its `Universal time` (under 0.5 s apart on this board), and `RTC in local TZ: no`.
+- To check whether NTP really has pulled the system into line, look at whether `timedatectl timesync-status` reports an `Offset` down at the millisecond level; with sync sustained, `System clock synchronized:` turns to `yes` (this varies by session — the Chapter 1 environment transcript `live/ch01-env.txt`, for instance, shows `yes`).
+
 ### When You'd Actually Use This
 
 **Mechanism**: RTC relies on its own independent low-frequency crystal oscillator and standby power to keep running even through a full system power-off/reboot, or through suspend-to-RAM/disk (provided there's a battery or standby supply keeping the `RTXIN` oscillator and the RTC domain powered). This is fundamentally different from SYC/`arch_timer` (which zeroes at boot and runs off the system clock): one is "must remember what time it is even through a power loss," the other is "measure elapsed time since boot."
@@ -471,7 +665,7 @@ rtcwake -d rtc0 -m mem -s 60      # sets an RTC alarm, suspends to RAM, auto-wak
 **Decision rule**:
 
 - When you need to "know the actual current date and time as soon as you boot" (**take system logs needing correct timestamps, or certificates/TLS needing to validate an expiry date, as examples**), use the RTC to read the initial time (`hwclock -r`, or `hwclock -s` in a boot script). After boot, the passage of Linux system time is still handled by the kernel's monotonic clock (which depends on SYC/`arch_timer`); the RTC is only read/written once at the boot and suspend/resume boundaries — it's not a component continuously participating in system timekeeping.
-- When you need to be "able to wake up on schedule even with no network connection" (**take low-power periodic sensing or scheduled tasks as examples**), the RTC's Alarm interrupt paired with `rtcwake` is a hardware-level scheduled-wake mechanism that still works while the CPU is fully asleep — this is its fundamental difference from other timers like GTM/OSTM/CMTW (which typically lose power along with their core domain during deep suspend).
+- When you need to be "able to wake up on schedule even with no network connection" (**take low-power periodic sensing or scheduled tasks as examples**), the RTC's Alarm interrupt paired with `rtcwake` is a hardware-level scheduled-wake mechanism that still works while the CPU is fully asleep. That is its fundamental difference from other timers like GTM/OSTM/CMTW, which typically lose power along with their core domain during deep suspend.
 
 **Take a data logger as an example** (needing correct timestamps), or **a sensor node needing scheduled wake-ups to save power as another**: whenever "retaining time information through a power loss" or "waking up on schedule while the CPU sleeps" is involved, you'll be using the RTC rather than any of the other timers. This decision line holds for any application domain — the question is "do I need time that survives power loss/survives sleep," not "which project am I working on."
 
@@ -498,5 +692,5 @@ rtcwake -d rtc0 -m mem -s 60      # sets an RTC alarm, suspends to RAM, auto-wak
 - **SYC is this group's one inventory gap**: it has no `/dev`/sysfs node; this board's "enabled" verdict is **inferred** from `arch_timer`'s interrupt being active, not directly measured. Figures like 24 MHz and 64-bit are always official Manual specs, never write them up as "measured on the board." If a future hands-on verification section is written for SYC, it needs board testing first (e.g. `cat /proc/interrupts | grep arch_timer`).
 - **"64 PWM outputs" is a spec-derived figure, not something measured on this board**: that's the theoretical silicon ceiling of 4 pins × 16 channels; this board in practice only has the 8 channels of GPT0 ch0–7 with `okay` nodes, and no PWM chip. When writing about or citing this, always distinguish "theoretical silicon ceiling" from "what's actually usable on this board's Linux."
 - **CMTW/GPT/POEG's pin capabilities are unreachable from this board's Linux application layer**: input capture, output compare, and PWM output all exist in silicon, but none of them have an existing kernel driver exposing them to the application layer. To use them you'd have to write your own driver, or go through the realtime core (Cortex-R8/M33) firmware — and the latter isn't exposed to Linux on this board, requiring the remoteproc/firmware-loading path first (which belongs to a different chapter's scope).
-- **The 40-pin header's `PWM0`/`PWM1` silkscreen labels haven't been verified against the pinmux**: whether Pin32/33 (`GPIO12`/`GPIO13`) on the header, labeled `PWM0`/`PWM1`, really connects to GPT's `GTIOCnA`/`B`, or is just following Raspberry Pi's naming convention, needs the PFC pinmux table or schematic to confirm — this document only records the silkscreen as-is, without speculating on what it maps to.
+- **The 40-pin header's pin-to-GPT mapping is settled in principle, but not yet down to the wire**: the `PWM0`/`PWM1` silkscreen labels really do land on GPT (pin 32 = `PA4` → `GTIOC6A`, pin 33 = `PA7` → `GTIOC7B`; see §4's note box for the full cross-check and the header-wide counts). What is still open is the electrical side: the RDK schematic is not in hand, so series resistors, level shifting or an existing on-board load may rule out particular pins, and for 7 header pins the "pin number ↔ port pin" mapping is not yet pinned down. The counts hold; the wiring plan doesn't, until those are closed.
 - **Register-level, bit-by-bit detail is out of scope for this document**: this group only covers the official Manual's "functional overview" level (Overview/Features/Block Diagram). The bit-by-bit register descriptions for each unit (`OSTMnCTL`, `GTIOR`, `GTCCRA-F`, `CMWIOR`, the various RTC registers…) and the actual timing in the Operation chapters — if you need to write register-level bare-metal control instructions, you'll need to pull the corresponding section of the Manual separately.

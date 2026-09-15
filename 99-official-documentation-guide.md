@@ -36,7 +36,7 @@ This stack of documents breaks down into roughly five roles, each answering one 
  "Why was it designed this way?"          →   White Paper                        "architecture / rationale / trade-offs"
 ```
 
-There's also a **level**-based division you need to get straight first: everything above is about the **SoC (the chip)**; whereas "where does this **board's** connector go, what's on which pin of the 40-pin header, how do the DIP switches get set" is a **carrier-board (board) level** question, and you look that up in the RDK board manual (see the WS125 document below) — the chip manuals have no answers for these.
+There's also a **level**-based division you need to get straight first. Everything above is about the **SoC (the chip)**; but "where does this **board's** connector go, what's on which pin of the 40-pin header, how do the DIP switches get set" is a **carrier-board (board) level** question, and you look that up in the RDK board manual (see the WS125 document below) — the chip manuals have no answers for these.
 
 It's enough to remember this table as a single rule of thumb: **ask "what is it, how many" → check the datasheet; ask "how do I set the registers" → check the Manual; ask "how do I get it running" → check the application note; ask "how do I use the software interface" → check the software manual; ask "why" → check the white paper; ask "how does the board wire up" → check the board manual.**
 
@@ -50,7 +50,7 @@ The official documents live in `reference-docs/`, at the same level as the handb
 ls -la ../../reference-docs/
 ```
 
-Actual output (verbatim, run in this folder on 2026-07-18; the date/time column reflects when you cloned the repo, so yours will differ):
+Actual output (verbatim, run in this folder; the date/time column reflects when you cloned the repo, so yours will differ):
 
 ```text
 total 53284
@@ -68,11 +68,11 @@ drwxrwxr-x 7 user user     4096 Jul 18 16:21 ..
 -rw-rw-r-- 1 user user  1684127 Jul 18 16:21 REN_WS125V2HRDKREFZ_MAH_20260323.pdf
 ```
 
-Line up the nine `.pdf` filenames and run them through the prefix trick above, and you can already tell who's who; the other two non-PDF files are `README.md` (the folder's own description) and `_toc_full.txt` (the Manual's complete table of contents — the entire next section is about it. It's not listed in the output above because it starts with an underscore and sorts last; the last line of the full `ls -la` output is `246904 … _toc_full.txt`).
+Line up the nine `.pdf` filenames and run them through the prefix trick above, and you can already tell who's who. The other two non-PDF files are `README.md` (the folder's own description) and `_toc_full.txt` (the Manual's complete table of contents — the entire next section is about it). `_toc_full.txt` isn't listed in the output above because it starts with an underscore and so sorts last; the last line of the full `ls -la` output is `246904 … _toc_full.txt`.
 
-> **What "document count / file size" is based on**: The document list and byte counts in this section are all based on the `ls -la` output shown above, run directly against `../../reference-docs/` (9 PDFs; the datasheet `r01ds0429` is a 264,840 B text conversion). The transcript `live/ch04b-docs-local.txt` cited in the ✅ verification steps further down is used only to back up the `grep` results against `_toc_full.txt` (chapter page numbers, the CAN-FD/I2C line counts, etc.) — it is **not** the basis for the document list or file sizes. If you have your own `ls` output run against a different copy of these documents (e.g., the count or the datasheet size doesn't match), just go with the one you ran yourself against `reference-docs/` — the two are different copies, not a contradiction.
+> **What "document count / file size" is based on**: The document list and byte counts in this section are all based on the `ls -la` output shown above, run directly against `../../reference-docs/` (9 PDFs; the datasheet `r01ds0429` is a 264,840 B text conversion). The transcript `live/ch04b-docs-local.txt` cited in the ✅ verification steps further down is used only to back up the `grep` results against `_toc_full.txt` (chapter page numbers, the CAN-FD/I2C line counts, and so on). It is **not** the basis for the document list or file sizes. If you have your own `ls` output run against a different copy of these documents — say the count or the datasheet size doesn't match — go with the one you ran yourself against `reference-docs/`; the two are different copies, not a contradiction.
 
-The table below lays out each document's role, size (byte counts taken verbatim from the `ls -la` above), and **how thoroughly it's actually been read so far** — the "read status" column especially deserves a look, since it determines how much you can trust this handbook's description of that document. Page counts and each file's self-reported title were read out by running `pdfinfo` (poppler-utils) on the workstation, 2026-07-18:
+The table below lays out each document's role, size (byte counts taken verbatim from the `ls -la` above), and **how thoroughly it has actually been read**. The "read status" column especially deserves a look, since it determines how much you can trust this handbook's description of that document. Page counts and each file's self-reported title were read out by running `pdfinfo` (poppler-utils) on the workstation:
 
 | Filename (prefix type) | Size | What question to check it for | Read status / format notes |
 |---|---|---|---|
@@ -107,7 +107,7 @@ Someone who knows how to look things up spends 80% of their time on that 43.9 MB
 1. **The chapter numbers match, one by one.** This table of contents' chapter numbers line up exactly with the "hw_manual chapter" citations used across this chapter's files: `4.6 Interrupt Controller` is indeed the GIC chapter, `7.4 SCIF`, `9.2 Camera Data Receiver Unit (CRU)`... every single one checks out. If this were some other document, the numbers wouldn't coincidentally hit every single time.
 2. **The page-count order of magnitude matches.** This table of contents runs all the way up to around page 4816 (ending with `APPENDIX A PACKAGE DIMENSIONS`, `REVISION HISTORY`), consistent with the full 43.9 MB Manual; the datasheet is only 144 pages cover to cover (its text conversion self-reports `Page 1 of 144` at the start), so it couldn't be that.
 3. **The revision number matches.** The latest version in the `REVISION HISTORY` at the end of the table of contents is `1.30`, which lines up exactly with the `0130` in the filename `r01uh1032**ej0130**` (= Rev. 1.30).
-4. **`pdfinfo` matches directly.** Running `pdfinfo ../../reference-docs/r01uh1032ej0130-rzv2h.pdf` against the PDF itself self-reports the title `RZ/V2H Group User's Manual: Hardware (Non-Agreement)`, `Pages: 4816` — the page count matches the end of the table of contents (`4816 Back Cover`) exactly (run on the workstation 2026-07-18).
+4. **`pdfinfo` matches directly.** Running `pdfinfo ../../reference-docs/r01uh1032ej0130-rzv2h.pdf` against the PDF itself self-reports the title `RZ/V2H Group User's Manual: Hardware (Non-Agreement)`, `Pages: 4816` — the page count matches the end of the table of contents (`4816 Back Cover`) exactly (run on the workstation).
 
 All four pieces of evidence point to the same conclusion: `_toc_full.txt` is the complete table of contents for the Manual, `r01uh1032ej0130`. From here on, use it as an index with confidence.
 
@@ -117,7 +117,7 @@ First, look at its top-level skeleton — the whole Manual is divided into 10 SE
 grep -E "^[0-9]+	SECTION " ../../reference-docs/_toc_full.txt
 ```
 
-(That's a Tab character in the `grep` pattern: each line in the file is formatted as "page number + Tab + chapter title.") Expected output (verbatim, ✅ re-run and cross-checked consistent on 2026-07-18, transcript: live/ch04b-docs-local.txt; the number at the start of each line is **that chapter's starting page in the Manual PDF**):
+(That's a Tab character in the `grep` pattern: each line in the file is formatted as "page number + Tab + chapter title.") Expected output (verbatim, ✅ Verified; transcript: live/ch04b-docs-local.txt; the number at the start of each line is **that chapter's starting page in the Manual PDF**):
 
 ```text
 76	SECTION 1 OVERVIEW
@@ -140,7 +140,7 @@ The next step is to drill down one level and find which chapter and page your ta
 grep "Gigabit Ethernet" ../../reference-docs/_toc_full.txt
 ```
 
-Expected output (verbatim, ✅ re-run and cross-checked consistent on 2026-07-18, transcript: live/ch04b-docs-local.txt):
+Expected output (verbatim, ✅ Verified; transcript: live/ch04b-docs-local.txt):
 
 ```text
 1632	  6.3 Gigabit Ethernet Interface (GBETH)
@@ -160,7 +160,7 @@ Grepping the unit name directly is convenient, but there's a pitfall you need to
 
 ## Which Chapter to Check: Common Units → Chapter/Page List
 
-Run the grep trick above once for every unit and organize the results into the reference table below — from here on, whenever you need to look up the register detail for any on-board unit, just jump to the page per the table. The page numbers in the table's "Chapter (page)" column are **taken verbatim from `_toc_full.txt`** (the same number you'd see from grep; ✅ re-verified line by line with `grep` on 2026-07-18, including `1.8 Address Map` (p167) — every chapter name and page number in the tables is consistent, transcript: live/ch04b-docs-local.txt); the "Register base" column comes from the results of this handbook's hardware inventory probing (Source: `07-hardware-unit-usage-guide.md`, i.e. d06), for you to cross-check against `/proc/iomem` or use when writing bare-metal code.
+Run the grep trick above once for every unit and organize the results into the reference table below — from here on, whenever you need to look up the register detail for any on-board unit, just jump to the page per the table. The page numbers in the table's "Chapter (page)" column are **taken verbatim from `_toc_full.txt`** (the same number you'd see from grep; ✅ Verified line by line with `grep`, including `1.8 Address Map` (p167) — every chapter name and page number in the tables is consistent; transcript: live/ch04b-docs-local.txt); the "Register base" column comes from the results of this handbook's hardware inventory probing (Source: `07-hardware-unit-usage-guide.md`, i.e. d06), for you to cross-check against `/proc/iomem` or use when writing bare-metal code.
 
 **SECTION 2 PROCESSORS (processors and AI accelerator, starting page 212)**
 
@@ -189,7 +189,7 @@ Run the grep trick above once for every unit and organize the results into the r
 | DMA controller (DMAC) | 4.7 DMA Controller (DMAC) (p994) | DMAC0 `0x11400000`, DMAC1 `0x14830000`, DMAC2 `0x14840000` (DMAC1/2 are 64 KB apart) |
 | Debug interface (CoreSight/JTAG/SWD) | 4.9 Debug Interface (p1119) | CoreSight (CST) `0x1F000000` (16 MB) |
 
-> 📌 **Address correction note**: For the GIC-600 and DMAC0 cells in the table above, the earlier secondhand source had a transcription discrepancy here — GIC was once recorded as `0x14800000` (which, per §1.8 Address Map, is actually the SRAM2(REG) region), and DMAC0 was once recorded as `0x11C00000` (which is actually the ADC's address, in the same SECTION 7 table). The source document's transcription was wrong here; it has been corrected against the official manual's §1.8 Address Map (p167), §4.6.2.2 (p961), and Table 4.7-4 (p1001): GIC-600 base `0x14900000`, DMAC0/1/2 = `0x11400000`/`0x14830000`/`0x14840000`.
+> 📌 **Address correction note**: For the GIC-600 and DMAC0 cells in the table above, the earlier secondhand source had a transcription discrepancy here — GIC was once recorded as `0x14800000` (which, per §1.8 Address Map, is actually the SRAM2(REG) region), and DMAC0 was once recorded as `0x11C00000` (which is actually the ADC's address, in the same SECTION 7 table). The source document's transcription was wrong here; it has been corrected against the official Manual's §1.8 Address Map (p167), §4.6.2.2 (p961), and Table 4.7-4 (p1001): GIC-600 base `0x14900000`, DMAC0/1/2 = `0x11400000`/`0x14830000`/`0x14840000`.
 
 **SECTION 5 TIMER (timer group, starting page 1161)**
 
@@ -225,7 +225,7 @@ Run the grep trick above once for every unit and organize the results into the r
 | I3C bus | 7.8 I3C Bus Interface (I3C) (p3061) | I3C0 `0x12400000` |
 | CAN-FD (6 ch) | 7.9 CAN-FD Interface (CANFD) (p3363) | CANFD base `0x12440000`, a single base covers 6 channels |
 | 12-bit ADC | 7.10 12-Bit A/D Converter (ADC) (p3670) | ADC `0x11C00000` |
-| Temperature sensor (TSU) | 7.11 Temperature Sensor Unit (TSU) (p3739) | TSU0 `0x11000000`, TSU1 `0x14002000` (trim values come from OTP [one-time-programmable memory on the chip], 0.0625 °C/code) |
+| Temperature sensor (TSU) | 7.11 Temperature Sensor Unit (TSU) (p3739) | TSU0 `0x11000000`, TSU1 `0x14002000` (both base addresses verified against the hardware manual's §1.8 address map, `<TSU0_base>`/`<TSU1_base>`; trim values come from OTP [one-time-programmable memory on the chip], 0.0625 °C/code — the trim values are a secondhand transcription, see the list of items pending verification in g7) |
 
 > 💡 **Tip**: If you're writing a driver for CAN-FD register by register, besides Manual Chapter 7.9, Renesas also has a separate FSP-edition CAN-FD manual, `r01us0478`, with more complete register documentation (not in this folder — you'll need to get it from Renesas separately). When hooking up a DroneCAN/UAVCAN controller (a flight controller, for example), the usual approach is to check 7.9 first to get the addresses, then flip to `r01us0478` to work through the registers one by one (Source: d06, `07-hardware-unit-usage-guide.md`).
 
@@ -263,7 +263,7 @@ If what you need to check isn't "register detail" but rather "spec numbers" (e.g
 
 ## That AWO/Firmware Deployment Document (Advanced, Know Where It Is For Now)
 
-Of the nine documents, `r01an7723` (AWO Example Program Startup Guide, R01AN7723EJ0400 Rev.4.00) is the only application note that's been read in full. What it teaches is **advanced firmware deployment** — how to run the AWO (wake/sleep control) example on CM33, and how to build CA55 and CM33 artifacts out of Yocto. This is **not within this chapter's hands-on scope** (this chapter covers the hardware resource map), so what's kept here is just a few pointers and known gotchas that'll be useful "for whenever you actually get into R8/M33 firmware" (Source: d18《一》, startup-guide.md):
+Of the nine documents, `r01an7723` (AWO Example Program Startup Guide, R01AN7723EJ0400 Rev.4.00) is the only application note that's been read in full. What it teaches is **advanced firmware deployment** — how to run the AWO (wake/sleep control) example on CM33, and how to build CA55 and CM33 artifacts out of Yocto. This is **not within this chapter's hands-on scope** (this chapter covers the hardware resource map), so what's kept here is just a few pointers and known gotchas that'll be useful "for whenever you actually get into R8/M33 firmware" (Source: d18 item 1, startup-guide.md):
 
 - **Document structure**: 6 chapters in total — 1 Specifications / 2 Proven Environment / 3 RZ/V2H Setup / 4 RZ/V2N Setup / 5 Invocation (Suspend-to-RAM not supported) / 6 Invocation (S2R supported). Note that this document covers both the RZ/V2H and RZ/V2N boards at once, so make sure you know which chapter you're in as you read. (The original never spells out what "AWO" stands for — it uses the abbreviation throughout without ever expanding it, so this handbook won't make up a full name for it either.)
 - **Verified tool versions** (copied straight from the original, so you can match your environment): e2 studio **2025-12**; RZ/V2H AI SDK **v6.00**, RZ/V2N AI SDK **v6.30**; RZ Flexible Software Package (FSP) **v4.0.0** (Source: startup-guide.md:89–94).
@@ -294,12 +294,12 @@ Besides this stack of documents in the repo, there are also official online docs
 
 Once you've done these few things, it means you can now use this stack of documents as a map:
 
-1. ✅ **List the nine documents** (run in this folder on 2026-07-18, output shown earlier under "What's Actually in the Folder"). Run `ls -1 ../../reference-docs/*.pdf`, count whether it's **9 `.pdf` files**, and for each filename's leading prefix (`R01DS`/`R01UH`/`R01US`/`R01AN`/`R01QS`/`R01WP`/`R20AN`/`REN_…R16UH`), be able to say what kind of document it is.
+1. ✅ **List the nine documents** (run in this folder; the output is shown earlier under "What's Actually in the Folder"). Run `ls -1 ../../reference-docs/*.pdf`, count whether it's **9 `.pdf` files**, and for each filename's leading prefix (`R01DS`/`R01UH`/`R01US`/`R01AN`/`R01QS`/`R01WP`/`R20AN`/`REN_…R16UH`), be able to say what kind of document it is.
 2. 📼 **Work backward from a question to the document.** Quiz yourself with four questions and see if you can say which document to check:
    - "How many CAN channels does this chip have?" → the datasheet (`r01ds0429`), Section 1 spec summary table.
    - "What's the register offset for the GPT timer?" → the Manual (`r01uh1032`), find the chapter using `_toc_full.txt`.
    - "How is DRP-AI3's 8 TOPS figure calculated?" → the white paper (`r01wp0022`).
    - "Where does a given pin on the 40-pin header connect to?" → the WS125 RDK **carrier-board** manual (`REN_WS125…`, remember to extract it first) — this is a board-level question, the chip manuals don't have it.
-3. ✅ **Use `_toc_full.txt` to jump to the correct chapter and page** (re-run 2026-07-18, transcript: live/ch04b-docs-local.txt). Pick any on-board unit at random (say, the CAN you're currently wiring up), run `grep "CAN-FD" ../../reference-docs/_toc_full.txt` — in practice this spits out **9 lines** (1 chapter-title line + 8 register sub-section lines containing "CAN-FD"), and recognize **the first line, and the only line with 2-space indentation**: `3363	  7.9 CAN-FD Interface (CANFD)` — that is, SECTION 7, Chapter 7.9, PDF page 3363. That page number is the target you jump to inside the 43.9 MB Manual.
-4. ✅ **Avoid the grep-flooding pitfall** (re-run 2026-07-18: `grep -c "I2C"` actually returns exactly 40 lines in practice, transcript: live/ch04b-docs-local.txt). Grep a "popular" unit (like `I2C`) directly and watch it spit out dozens of register lines; then use the "recognize what a chapter title looks like" method (2-space indent + parenthesized unit name, e.g. `2968	  7.7 I2C Bus Interface (RIIC)`) to pick out the chapter you actually want. Once you can do this, you won't get thrown off by register-name noise anymore.
+3. ✅ **Use `_toc_full.txt` to jump to the correct chapter and page** (verified; transcript: live/ch04b-docs-local.txt). Pick any on-board unit at random (say, the CAN you're currently wiring up), run `grep "CAN-FD" ../../reference-docs/_toc_full.txt` — in practice this spits out **9 lines** (1 chapter-title line + 8 register sub-section lines containing "CAN-FD"). Then learn to recognize **the first line, the only one with 2-space indentation**: `3363	  7.9 CAN-FD Interface (CANFD)` — that is, SECTION 7, Chapter 7.9, PDF page 3363. That page number is the target you jump to inside the 43.9 MB Manual.
+4. ✅ **Avoid the grep-flooding pitfall** (verified: `grep -c "I2C"` returns exactly 40 lines in practice; transcript: live/ch04b-docs-local.txt). Grep a "popular" unit (like `I2C`) directly and watch it spit out dozens of register lines; then use the "recognize what a chapter title looks like" method (2-space indent + parenthesized unit name, e.g. `2968	  7.7 I2C Bus Interface (RIIC)`) to pick out the chapter you actually want. Once you can do this, you won't get thrown off by register-name noise anymore.
 5. 📼 **Cross-check the numbers (optional).** Pick a unit whose base address you saw earlier in this chapter (e.g., GBETH `0x15C30000`), go to the manual's corresponding chapter (6.3, p1632), and confirm that the start of the register map matches — once "the base address from the inventory notes" and "the Manual's chapter" line up, you've genuinely learned to navigate this stack of documents.

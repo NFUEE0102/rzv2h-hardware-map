@@ -1,0 +1,78 @@
+# transcript 2026-07-22 11:19:38 ubuntu@<ip-redacted>
+
+$ for n in /proc/device-tree/reserved-memory/*/; do echo "== $n"; ls "$n"; done
+# rc=0 dur=2.4s
+== /proc/device-tree/reserved-memory/cru_buffer@B4000000/
+compatible
+name
+phandle
+reg
+reusable
+== /proc/device-tree/reserved-memory/DRP-AI@240000000/
+name
+phandle
+reg
+reusable
+== /proc/device-tree/reserved-memory/DRP-Codec@AFD00000/
+name
+phandle
+reg
+reusable
+== /proc/device-tree/reserved-memory/frame_buffer@90000000/
+compatible
+name
+phandle
+reg
+reusable
+== /proc/device-tree/reserved-memory/image_buf@B0000000/
+compatible
+label
+name
+phandle
+reg
+reusable
+== /proc/device-tree/reserved-memory/linux,cma@58000000/
+compatible
+linux,cma-default
+name
+phandle
+reg
+reusable
+== /proc/device-tree/reserved-memory/linux,multimedia/
+compatible
+name
+phandle
+reg
+reusable
+== /proc/device-tree/reserved-memory/OpenCVA@A8000000/
+name
+phandle
+reg
+reusable
+== /proc/device-tree/reserved-memory/vdev0buffer@0x43200000/
+compatible
+name
+no-map
+phandle
+reg
+== /proc/device-tree/reserved-memory/vdev0vring0@0x43000000/
+compatible
+name
+no-map
+phandle
+reg
+== /proc/device-tree/reserved-memory/vdev0vring1@0x43050000/
+compatible
+name
+no-map
+phandle
+reg
+
+$ grep -c MemTotal /proc/meminfo; grep -E "MemTotal|MemFree|MemAvailable|CmaTotal|CmaFree" /proc/meminfo
+# rc=0 dur=0.1s
+1
+MemTotal:       15565904 kB
+MemFree:        13566216 kB
+MemAvailable:   14633272 kB
+CmaTotal:        1740800 kB
+CmaFree:         1472280 kB

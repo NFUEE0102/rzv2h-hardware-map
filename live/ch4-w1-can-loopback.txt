@@ -1,0 +1,78 @@
+# transcript 2026-07-22 15:04:16 ubuntu@<ip-redacted> (sudo-run)
+
+$ sudo -S sh -c 'whoami'
+# rc=0 dur=2.8s
+root
+
+$ echo IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJDQU4g5YWn6YOo6L+055Kw6amX6K2J77yI5p2/5LiK54ShIGNhbi11dGlsc++8jOS7pSBweXRob24gc29ja2V0IEFGX0NBTiDku6Pmm78gY2FuZHVtcC9jYW5zZW5k77yJ44CCCueUqOazle+8mnB5dGhvbjMgY2FudGVzdC5weSBjYW4wIOKAlOKAlCDplovlhanlgIsgQ0FOX1JBVyBzb2NrZXTvvIjkuIDmlLbkuIDnmbzvvInvvIwK6YCB5LiA562GIGlkPTB4MTIzIGRhdGE9REVBREJFRUbvvIwzIOenkuWFp+aUtuWIsOWNsyBSRUNFSVZFRO+8iHJjPTDvvInvvIzlkKbliYcgVElNRU9VVO+8iHJjPTHvvInjgIIiIiIKaW1wb3J0IHNvY2tldCwgc3RydWN0LCBzZWxlY3QsIHN5cwoKaWZjID0gc3lzLmFyZ3ZbMV0KcnggPSBzb2NrZXQuc29ja2V0KHNvY2tldC5BRl9DQU4sIHNvY2tldC5TT0NLX1JBVywgc29ja2V0LkNBTl9SQVcpCnJ4LmJpbmQoKGlmYywpKQp0eCA9IHNvY2tldC5zb2NrZXQoc29ja2V0LkFGX0NBTiwgc29ja2V0LlNPQ0tfUkFXLCBzb2NrZXQuQ0FOX1JBVykKdHguYmluZCgoaWZjLCkpCnBheWxvYWQgPSBiIlx4ZGVceGFkXHhiZVx4ZWYiCmZyYW1lID0gc3RydWN0LnBhY2soIj1JQjN4OHMiLCAweDEyMywgbGVuKHBheWxvYWQpLCBwYXlsb2FkLmxqdXN0KDgsIGIiXHgwMCIpKQp0eC5zZW5kKGZyYW1lKQpyLCBfLCBfID0gc2VsZWN0LnNlbGVjdChbcnhdLCBbXSwgW10sIDMuMCkKaWYgbm90IHI6CiAgICBwcmludCgiVElNRU9VVDogbm8gZnJhbWUgcmVjZWl2ZWQgaW4gMyBzIikKICAgIHN5cy5leGl0KDEpCmRhdGEgPSByeC5yZWN2KDE2KQpjaWQsIGRsYywgZGF0ID0gc3RydWN0LnVucGFjaygiPUlCM3g4cyIsIGRhdGEpCnByaW50KCJSRUNFSVZFRCBpZD0weCUwM1ggZGxjPSVkIGRhdGE9JXMiICUgKGNpZCwgZGxjLCBkYXRbOmRsY10uaGV4KCkpKQo= | base64 -d > /tmp/ch4-cantest.py && md5sum /tmp/ch4-cantest.py
+# rc=0 dur=0.5s
+3e2dcb37993f327489d57ae2a32748e8  /tmp/ch4-cantest.py
+
+$ sudo -S sh -c 'ip link set can0 up type can bitrate 500000 loopback on'
+# rc=2 dur=0.5s
+[stderr] RTNETLINK answers: Operation not supported
+
+$ ip -details link show can0 | head -5
+# rc=0 dur=0.5s
+5: can0: <NOARP,ECHO> mtu 72 qdisc noop state DOWN mode DEFAULT group default qlen 10
+    link/can  promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 
+    can <FD> state STOPPED (berr-counter tx 0 rx 0) restart-ms 0 
+	  rcar_canfd: tseg1 2..128 tseg2 2..32 sjw 1..32 brp 1..1024 brp_inc 1
+	  rcar_canfd: dtseg1 2..16 dtseg2 2..8 dsjw 1..8 dbrp 1..256 dbrp_inc 1
+
+$ python3 /tmp/ch4-cantest.py can0; echo test_rc=$?
+# rc=0 dur=1.0s
+test_rc=1
+[stderr] Traceback (most recent call last):
+  File "/tmp/ch4-cantest.py", line 14, in <module>
+    tx.send(frame)
+OSError: [Errno 100] Network is down
+
+$ ip -statistics link show can0 | grep -A1 "RX:\|TX:"
+# rc=0 dur=0.5s
+    RX:  bytes packets errors dropped  missed   mcast           
+             0       0      0       0       0       0 
+    TX:  bytes packets errors dropped carrier collsns           
+             0       0      0       0       0       0
+
+$ sudo -S sh -c 'ip link set can0 down'
+# rc=0 dur=0.5s
+
+$ sudo -S sh -c 'ip link set can1 up type can bitrate 500000 loopback on'
+# rc=2 dur=0.5s
+[stderr] RTNETLINK answers: Operation not supported
+
+$ ip -details link show can1 | head -5
+# rc=0 dur=0.5s
+6: can1: <NOARP,ECHO> mtu 72 qdisc noop state DOWN mode DEFAULT group default qlen 10
+    link/can  promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 
+    can <FD> state STOPPED (berr-counter tx 0 rx 0) restart-ms 0 
+	  rcar_canfd: tseg1 2..128 tseg2 2..32 sjw 1..32 brp 1..1024 brp_inc 1
+	  rcar_canfd: dtseg1 2..16 dtseg2 2..8 dsjw 1..8 dbrp 1..256 dbrp_inc 1
+
+$ python3 /tmp/ch4-cantest.py can1; echo test_rc=$?
+# rc=0 dur=1.0s
+test_rc=1
+[stderr] Traceback (most recent call last):
+  File "/tmp/ch4-cantest.py", line 14, in <module>
+    tx.send(frame)
+OSError: [Errno 100] Network is down
+
+$ ip -statistics link show can1 | grep -A1 "RX:\|TX:"
+# rc=0 dur=0.5s
+    RX:  bytes packets errors dropped  missed   mcast           
+             0       0      0       0       0       0 
+    TX:  bytes packets errors dropped carrier collsns           
+             0       0      0       0       0       0
+
+$ sudo -S sh -c 'ip link set can1 down'
+# rc=0 dur=0.5s
+
+$ ip -br link | grep can
+# rc=0 dur=0.5s
+can0             DOWN           <NOARP,ECHO> 
+can1             DOWN           <NOARP,ECHO>
+
+$ rm -f /tmp/ch4-cantest.py; echo cleanup_rc=$?
+# rc=0 dur=0.5s
+cleanup_rc=0

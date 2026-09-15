@@ -1,0 +1,36 @@
+# transcript 2026-07-18 14:46:11 ubuntu@<ip-redacted>
+
+$ for z in /sys/class/thermal/thermal_zone*/temp; do echo "baseline $z $(cat $z)"; done; cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+# rc=0 dur=4.0s
+baseline /sys/class/thermal/thermal_zone0/temp 34000
+baseline /sys/class/thermal/thermal_zone1/temp 35000
+1700000
+
+$ stress-ng --cpu 4 --timeout 300 --metrics-brief > /tmp/win-stress.log 2>&1 & SP=$!; for i in 1 2 3 4 5 6 7 8 9 10; do sleep 30; echo "t=$((i*30))s temps=$(cat /sys/class/thermal/thermal_zone0/temp) $(cat /sys/class/thermal/thermal_zone1/temp 2>/dev/null) freq=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq)"; done; wait $SP; cat /tmp/win-stress.log; rm -f /tmp/win-stress.log
+# rc=0 dur=300.7s
+t=30s temps=36000 38000 freq=1700000
+t=60s temps=37000 38000 freq=1700000
+t=90s temps=37000 38000 freq=1700000
+t=120s temps=37000 38000 freq=1700000
+t=150s temps=37000 38000 freq=1700000
+t=180s temps=37000 39000 freq=1700000
+t=210s temps=37000 39000 freq=1700000
+t=240s temps=37000 39000 freq=1700000
+t=270s temps=37000 39000 freq=1700000
+t=300s temps=37000 38000 freq=1700000
+stress-ng: info:  [175863] setting to a 5 mins, 0 secs run per stressor
+stress-ng: info:  [175863] dispatching hogs: 4 cpu
+stress-ng: info:  [175863] note: /proc/sys/kernel/sched_autogroup_enabled is 1 and this can impact scheduling throughput for processes not attached to a tty. Setting this to 0 may improve performance metrics
+stress-ng: metrc: [175863] stressor       bogo ops real time  usr time  sys time   bogo ops/s     bogo ops/s
+stress-ng: metrc: [175863]                           (secs)    (secs)    (secs)   (real time) (usr+sys time)
+stress-ng: metrc: [175863] cpu               84176    300.13   1178.41      1.36       280.47          71.35
+stress-ng: info:  [175863] skipped: 0
+stress-ng: info:  [175863] passed: 4: cpu (4)
+stress-ng: info:  [175863] failed: 0
+stress-ng: info:  [175863] metrics untrustworthy: 0
+stress-ng: info:  [175863] successful run completed in 5 mins, 0.24 secs
+
+$ for z in /sys/class/thermal/thermal_zone*/temp; do echo "after $z $(cat $z)"; done
+# rc=0 dur=0.1s
+after /sys/class/thermal/thermal_zone0/temp 37000
+after /sys/class/thermal/thermal_zone1/temp 38000

@@ -1,0 +1,14 @@
+# transcript 2026-07-17 19:02:35 ubuntu@<ip-redacted>
+
+$ systemctl is-active uav-wfb-tx
+# rc=0 dur=2.7s
+active
+
+$ for n in /proc/device-tree/soc/*/status; do tr -d "\0" < "$n"; echo; done | sort | uniq -c
+# rc=0 dur=0.9s
+     78 disabled
+     45 okay
+
+$ ls -d /proc/device-tree/soc/*/ | wc -l
+# rc=0 dur=0.1s
+134

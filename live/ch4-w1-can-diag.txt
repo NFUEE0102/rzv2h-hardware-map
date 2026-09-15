@@ -1,0 +1,50 @@
+# transcript 2026-07-22 15:04:55 ubuntu@<ip-redacted> (sudo-run)
+
+$ ethtool -i can0 2>&1; echo rc=$?
+# rc=0 dur=0.8s
+driver: rcar_canfd
+version: 6.10.14-arm64-renesas
+firmware-version: 
+expansion-rom-version: 
+bus-info: 12440000.can
+supports-statistics: no
+supports-test: no
+supports-eeprom-access: no
+supports-register-dump: no
+supports-priv-flags: no
+rc=0
+
+$ sudo -S sh -c 'ip link set can0 up type can bitrate 500000'
+# rc=2 dur=0.5s
+[stderr] RTNETLINK answers: Invalid argument
+
+$ ip -details link show can0 | head -4
+# rc=0 dur=0.5s
+5: can0: <NOARP,ECHO> mtu 72 qdisc noop state DOWN mode DEFAULT group default qlen 10
+    link/can  promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 
+    can <FD> state STOPPED (berr-counter tx 0 rx 0) restart-ms 0 
+	  bitrate 500000 sample-point 0.875
+
+$ sudo -S sh -c 'ip link set can0 down'
+# rc=0 dur=0.5s
+
+$ sudo -S sh -c 'ip link set can0 up type can bitrate 500000 loopback on 2>&1; echo inner_rc=$?'
+# rc=0 dur=0.5s
+RTNETLINK answers: Operation not supported
+inner_rc=2
+
+$ sudo -S sh -c 'dmesg | grep -i "canfd\\|can0" | tail -8'
+# rc=0 dur=0.5s
+[    5.493739] rcar_canfd 12440000.can: can_clk rate is 80000000
+[    5.501546] rcar_canfd 12440000.can: device registered (channel 0)
+[    5.507860] rcar_canfd 12440000.can: can_clk rate is 80000000
+[    5.515332] rcar_canfd 12440000.can: device registered (channel 3)
+[    5.521579] rcar_canfd 12440000.can: global operational state (clk 1, fdmode 1)
+[99574.476768] rcar_canfd 12440000.can can0: incorrect/missing data bit-timing
+[99574.483796] rcar_canfd 12440000.can can0: open_candev() failed: -EINVAL
+[99574.490445] A link change request failed with some changes committed already. Interface can0 may have been left with an inconsistent configuration, please check.
+
+$ ip -br link | grep can
+# rc=0 dur=0.5s
+can0             DOWN           <NOARP,ECHO> 
+can1             DOWN           <NOARP,ECHO>

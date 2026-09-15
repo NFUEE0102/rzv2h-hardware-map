@@ -1,0 +1,28 @@
+# transcript 2026-07-22 15:08:41 ubuntu@<ip-redacted>
+
+$ grep -H . /sys/power/state /sys/power/mem_sleep 2>&1
+# rc=0 dur=0.4s
+/sys/power/state:freeze mem disk
+/sys/power/mem_sleep:[s2idle]
+
+$ grep -H . /sys/power/wakeup_count /sys/power/pm_freeze_timeout 2>/dev/null; ls /sys/power/
+# rc=0 dur=0.1s
+/sys/power/wakeup_count:142
+/sys/power/pm_freeze_timeout:20000
+disk
+image_size
+mem_sleep
+pm_async
+pm_freeze_timeout
+reserved_size
+resume
+resume_offset
+state
+suspend_stats
+sync_on_suspend
+wakeup_count
+
+$ ls /sys/kernel/debug/pm_genpd 2>&1 || echo "pm_genpd not accessible (needs root/debugfs)"
+# rc=0 dur=0.1s
+ls: cannot access '/sys/kernel/debug/pm_genpd': Permission denied
+pm_genpd not accessible (needs root/debugfs)

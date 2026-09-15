@@ -1,0 +1,38 @@
+# transcript 2026-07-22 15:09:40 ubuntu@<ip-redacted>
+
+$ ls -l /dev/watchdog* 2>&1
+# rc=0 dur=2.4s
+crw------- 1 root root  10, 130 Jul 21 11:15 /dev/watchdog
+crw------- 1 root root 243,   0 Jul 21 11:15 /dev/watchdog0
+
+$ for w in /sys/class/watchdog/watchdog*; do echo "== $w"; for f in identity timeout min_timeout max_timeout state status nowayout; do echo "$f=$(cat $w/$f 2>&1)"; done; done
+# rc=0 dur=0.1s
+== /sys/class/watchdog/watchdog0
+identity=cat: /sys/class/watchdog/watchdog0/identity: No such file or directory
+timeout=cat: /sys/class/watchdog/watchdog0/timeout: No such file or directory
+min_timeout=cat: /sys/class/watchdog/watchdog0/min_timeout: No such file or directory
+max_timeout=cat: /sys/class/watchdog/watchdog0/max_timeout: No such file or directory
+state=cat: /sys/class/watchdog/watchdog0/state: No such file or directory
+status=cat: /sys/class/watchdog/watchdog0/status: No such file or directory
+nowayout=cat: /sys/class/watchdog/watchdog0/nowayout: No such file or directory
+
+$ dmesg 2>/dev/null | grep -i "watchdog\|wdt" | head; echo rc=$?
+# rc=0 dur=0.1s
+[    2.974732] dwc-eth-dwmac 15c30000.ethernet: Enable RX Mitigation via HW Watchdog Timer
+rc=0
+
+$ who; echo ---; ps aux --sort=-%cpu | head -6
+# rc=0 dur=0.2s
+ubuntu   pts/0        2026-07-21 11:26 (<ip-redacted>)
+---
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+ubuntu    145443  600  0.0  10728  4032 ?        R    15:09   0:00 ps aux --sort=-%cpu
+ubuntu    141968  104  1.0 970020 161776 ?       RLsl 14:40  30:42 python3 -u mdc_tx.py /tmp/src2.mp4 127.0.0.1 5600 40 15 1.0
+ubuntu    145441 33.3  0.0   7048  3076 ?        Ss   15:09   0:00 bash -c who; echo ---; ps aux --sort=-%cpu | head -6
+ubuntu    145419  5.4  0.0  16552  6372 ?        S    15:09   0:00 sshd: ubuntu@notty
+root      145350  3.1  0.0  16392  8960 ?        Ss   15:09   0:00 sshd: ubuntu [priv]
+
+$ systemctl is-active watchdog 2>&1; systemctl list-units --all 2>/dev/null | grep -i watchdog; echo rc=$?
+# rc=0 dur=0.2s
+inactive
+rc=1

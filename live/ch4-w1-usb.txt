@@ -1,0 +1,32 @@
+# transcript 2026-07-22 15:07:12 ubuntu@<ip-redacted>
+
+$ lsblk -o NAME,SIZE,TYPE,TRAN,MOUNTPOINT,MODEL 2>&1
+# rc=0 dur=0.4s
+NAME          SIZE TYPE TRAN MOUNTPOINT MODEL
+mtdblock0   116.5K disk                 
+mtdblock1     1.8M disk                 
+mtdblock2     128K disk                 
+mtdblock3      14M disk                 
+mmcblk0     238.8G disk mmc             
+├─mmcblk0p1   200M part mmc             
+└─mmcblk0p2 238.6G part mmc  /
+
+$ ls /dev/sd* 2>&1; echo rc=$?
+# rc=0 dur=0.1s
+ls: cannot access '/dev/sd*': No such file or directory
+rc=2
+
+$ lsusb 2>&1
+# rc=0 dur=0.1s
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 004 Device 002: ID 0bda:8812 Realtek Semiconductor Corp. RTL8812AU 802.11a/b/g/n/ac 2T2R DB WLAN Adapter
+
+$ for f in /sys/bus/usb/devices/usb*; do echo "== $f $(cat $f/product 2>/dev/null) speed=$(cat $f/speed 2>/dev/null)Mbps"; done
+# rc=0 dur=0.1s
+== /sys/bus/usb/devices/usb1 xHCI Host Controller speed=480Mbps
+== /sys/bus/usb/devices/usb2 xHCI Host Controller speed=20000Mbps
+== /sys/bus/usb/devices/usb3 xHCI Host Controller speed=480Mbps
+== /sys/bus/usb/devices/usb4 xHCI Host Controller speed=20000Mbps

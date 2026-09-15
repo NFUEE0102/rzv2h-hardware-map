@@ -1,0 +1,30 @@
+# transcript 2026-07-22 15:01:38 ubuntu@<ip-redacted>
+
+$ ip -br link | grep -i can; echo rc=$?
+# rc=0 dur=0.4s
+can0             DOWN           <NOARP,ECHO> 
+can1             DOWN           <NOARP,ECHO> 
+rc=0
+
+$ ip -details link show can0 2>&1 | head -12
+# rc=0 dur=0.1s
+5: can0: <NOARP,ECHO> mtu 72 qdisc noop state DOWN mode DEFAULT group default qlen 10
+    link/can  promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 
+    can <FD> state STOPPED (berr-counter tx 0 rx 0) restart-ms 0 
+	  rcar_canfd: tseg1 2..128 tseg2 2..32 sjw 1..32 brp 1..1024 brp_inc 1
+	  rcar_canfd: dtseg1 2..16 dtseg2 2..8 dsjw 1..8 dbrp 1..256 dbrp_inc 1
+	  clock 80000000 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 parentbus platform parentdev 12440000.can
+
+$ ip -details link show can1 2>&1 | head -12
+# rc=0 dur=0.1s
+6: can1: <NOARP,ECHO> mtu 72 qdisc noop state DOWN mode DEFAULT group default qlen 10
+    link/can  promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 
+    can <FD> state STOPPED (berr-counter tx 0 rx 0) restart-ms 0 
+	  rcar_canfd: tseg1 2..128 tseg2 2..32 sjw 1..32 brp 1..1024 brp_inc 1
+	  rcar_canfd: dtseg1 2..16 dtseg2 2..8 dsjw 1..8 dbrp 1..256 dbrp_inc 1
+	  clock 80000000 numtxqueues 1 numrxqueues 1 gso_max_size 65536 gso_max_segs 65535 tso_max_size 65536 tso_max_segs 65535 gro_max_size 65536 parentbus platform parentdev 12440000.can
+
+$ which candump cansend; sudo -n true 2>&1; echo sudo_rc=$?
+# rc=0 dur=0.1s
+sudo: a password is required
+sudo_rc=1

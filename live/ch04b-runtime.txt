@@ -1,0 +1,71 @@
+# transcript 2026-07-18 08:34:10 ubuntu@<ip-redacted>
+
+$ systemctl is-active uav-wfb-tx
+# rc=0 dur=2.2s
+active
+
+$ ls /sys/class/remoteproc/
+# rc=0 dur=0.1s
+remoteproc0
+
+$ ls /sys/class/uio 2>/dev/null; echo uio-rc=$?
+# rc=0 dur=0.1s
+uio-rc=0
+
+$ ls -1 /dev/video* /dev/media* 2>/dev/null
+# rc=0 dur=0.1s
+/dev/media0
+/dev/video0
+
+$ lsmod | grep -iE "mali|drp|uvcs|vsp|canfd|cru|csi2|rzg2l"
+# rc=0 dur=0.1s
+vspm_if                36864  1
+vspm                  102400  1 vspm_if
+uvcs_drv               40960  1
+mali_kbase            798720  0
+
+$ journalctl -k -b --no-pager 2>&1 | grep -iE "reserved mem|DRP-AI Driver|DRP Driver version|Probed as mali|rz-dmac" | head -30
+# rc=0 dur=8.7s
+Jul 17 22:34:49 ubuntu kernel: mali 14850000.gpu: Probed as mali0
+Jul 17 22:34:50 ubuntu kernel: rgnmm_drv mmngr: assigned reserved memory node linux,multimedia
+
+$ lsusb
+# rc=0 dur=0.1s
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 002 Device 002: ID 0e8d:7961 MediaTek Inc. Wireless_Device
+Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+
+$ cat /sys/class/net/end0/speed
+# rc=0 dur=0.1s
+100
+
+$ ls /sys/bus/iio/devices/iio:device0/
+# rc=0 dur=0.1s
+in_voltage0_get_value
+in_voltage0_raw
+in_voltage1_get_value
+in_voltage1_raw
+in_voltage2_get_value
+in_voltage2_raw
+in_voltage3_get_value
+in_voltage3_raw
+in_voltage4_get_value
+in_voltage4_raw
+in_voltage5_get_value
+in_voltage5_raw
+in_voltage6_get_value
+in_voltage6_raw
+in_voltage7_get_value
+in_voltage7_raw
+name
+of_node
+power
+subsystem
+uevent
+waiting_for_supplier
+
+$ cat /sys/bus/iio/devices/iio:device0/in_voltage0_raw
+# rc=0 dur=0.1s
+2819

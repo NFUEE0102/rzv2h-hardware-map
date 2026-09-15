@@ -1,0 +1,26 @@
+# transcript 2026-07-22 15:05:56 ubuntu@<ip-redacted> (sudo-run)
+
+$ sudo -S sh -c 'ip link set can0 up type can bitrate 500000 dbitrate 2000000 fd on 2>&1; echo inner_rc=$?'
+# rc=0 dur=0.8s
+inner_rc=0
+
+$ ip -details link show can0 | head -6
+# rc=0 dur=0.5s
+5: can0: <NOARP,UP,LOWER_UP,ECHO> mtu 72 qdisc pfifo_fast state UP mode DEFAULT group default qlen 10
+    link/can  promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 
+    can <FD> state ERROR-ACTIVE (berr-counter tx 0 rx 0) restart-ms 0 
+	  bitrate 500000 sample-point 0.875
+	  tq 25 prop-seg 34 phase-seg1 35 phase-seg2 10 sjw 5 brp 2
+	  rcar_canfd: tseg1 2..128 tseg2 2..32 sjw 1..32 brp 1..1024 brp_inc 1
+
+$ sudo -S sh -c 'ip link set can0 down'
+# rc=0 dur=0.5s
+
+$ ip -br link | grep can0
+# rc=0 dur=0.5s
+can0             DOWN           <NOARP,ECHO>
+
+$ ls /tmp/ch4-cantest.py 2>&1; echo rc=$?
+# rc=0 dur=0.5s
+ls: cannot access '/tmp/ch4-cantest.py': No such file or directory
+rc=2

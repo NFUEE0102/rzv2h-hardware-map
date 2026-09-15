@@ -1,0 +1,140 @@
+# transcript 2026-07-17 18:59:54 ubuntu@<ip-redacted>
+
+$ systemctl is-active uav-wfb-tx
+# rc=0 dur=2.6s
+active
+
+$ find /proc/device-tree/ -name status -exec sh -c 'tr -d "\0" < "$1"; echo' _ {} \; | sort | uniq -c
+# rc=0 dur=1.5s
+     84 disabled
+     52 okay
+
+$ dmesg | wc -l; dmesg | head -2
+# rc=0 dur=0.1s
+1419
+[26863.950772] net_ratelimit: 1014 callbacks suppressed
+[26863.955836] af_packet: wlx00c0cabb639c selects TX queue 2, but real number of TX queues is 1
+
+$ lscpu
+# rc=0 dur=0.1s
+Architecture:                         aarch64
+CPU op-mode(s):                       32-bit, 64-bit
+Byte Order:                           Little Endian
+CPU(s):                               4
+On-line CPU(s) list:                  0-3
+Vendor ID:                            ARM
+Model name:                           Cortex-A55
+Model:                                0
+Thread(s) per core:                   1
+Core(s) per cluster:                  4
+Socket(s):                            -
+Cluster(s):                           1
+Stepping:                             r2p0
+CPU(s) scaling MHz:                   100%
+CPU max MHz:                          1700.0000
+CPU min MHz:                          212.5000
+BogoMIPS:                             48.00
+Flags:                                fp asimd evtstrm crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+L2 cache:                             1 MiB (1 instance)
+Vulnerability Gather data sampling:   Not affected
+Vulnerability Itlb multihit:          Not affected
+Vulnerability L1tf:                   Not affected
+Vulnerability Mds:                    Not affected
+Vulnerability Meltdown:               Not affected
+Vulnerability Mmio stale data:        Not affected
+Vulnerability Reg file data sampling: Not affected
+Vulnerability Retbleed:               Not affected
+Vulnerability Spec rstack overflow:   Not affected
+Vulnerability Spec store bypass:      Not affected
+Vulnerability Spectre v1:             Mitigation; __user pointer sanitization
+Vulnerability Spectre v2:             Not affected
+Vulnerability Srbds:                  Not affected
+Vulnerability Tsx async abort:        Not affected
+
+$ grep -m1 Features /proc/cpuinfo
+# rc=0 dur=0.1s
+Features	: fp asimd evtstrm crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+
+$ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
+# rc=0 dur=0.1s
+1700000
+
+$ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+# rc=0 dur=0.1s
+performance
+
+$ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_frequencies
+# rc=0 dur=0.1s
+212500 425000 850000 1700000
+
+$ cat /sys/class/thermal/thermal_zone0/temp; cat /sys/class/thermal/thermal_zone1/temp
+# rc=0 dur=0.1s
+39000
+39000
+
+$ cat /sys/class/remoteproc/remoteproc0/name; cat /sys/class/remoteproc/remoteproc0/state
+# rc=0 dur=0.1s
+cm33
+offline
+
+$ cat /sys/power/state
+# rc=0 dur=0.1s
+freeze mem disk
+
+$ cat /proc/asound/cards
+# rc=0 dur=0.1s
+ 0 [rcarsound      ]: rcar-sound - rcar-sound
+                      rcar-sound
+
+$ ls /dev/tee* 2>/dev/null || echo "no TEE device (no OP-TEE)"
+# rc=0 dur=0.1s
+no TEE device (no OP-TEE)
+
+$ ls /dev/dma_heap 2>/dev/null || echo "no dma_heap (use CMA 0x58000000)"
+# rc=0 dur=0.1s
+linux,cma@58000000
+
+$ ls /sys/class/pwm 2>/dev/null || echo "no pwm class (GPT has no PWM chip)"
+# rc=0 dur=0.1s
+
+$ ls -ld /sys/class/pwm 2>/dev/null; echo probe-rc=$?
+# rc=0 dur=0.1s
+drwxr-xr-x 2 root root 0 Mar 24 21:45 /sys/class/pwm
+probe-rc=0
+
+$ eglinfo | grep -i renderer
+# rc=0 dur=0.2s
+OpenGL ES profile renderer: Mali-G31
+
+$ gst-inspect-1.0 omxh265enc | head -12
+# rc=0 dur=0.2s
+Factory Details:
+  Rank                     primary + 256 (512)
+  Long-name                OpenMAX H.265 Video Encoder
+  Klass                    Codec/Encoder/Video/Hardware
+  Description              Encode H.265 video streams
+  Author                   Sebastian Dröge <sebastian.droege@collabora.co.uk>
+
+Plugin Details:
+  Name                     omx
+  Description              GStreamer OpenMAX Plug-ins
+  Filename                 /usr/lib/aarch64-linux-gnu/gstreamer-1.0/libgstomx.so
+  Version                  1.19.2
+
+$ ls -l /dev/i2c-4
+# rc=0 dur=0.1s
+crw-rw---- 1 root i2c 89, 4 Jul 17 11:21 /dev/i2c-4
+
+$ i2cget -y 4 0x6a 0x0f
+# rc=0 dur=0.1s
+0x22
+
+$ ip -br link
+# rc=0 dur=0.1s
+lo               UNKNOWN        00:00:00:00:00:00 <LOOPBACK,UP,LOWER_UP> 
+dummy0           DOWN           da:b8:d4:8d:49:7a <BROADCAST,NOARP> 
+end0             UP             e2:80:e1:87:63:01 <BROADCAST,MULTICAST,UP,LOWER_UP> 
+sit0@NONE        DOWN           0.0.0.0 <NOARP> 
+can0             DOWN           <NOARP,ECHO> 
+can1             DOWN           <NOARP,ECHO> 
+wlx00c0cabb639c  UP             00:c0:ca:bb:63:9c <BROADCAST,MULTICAST,UP,LOWER_UP>

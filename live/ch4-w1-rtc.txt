@@ -1,0 +1,43 @@
+# transcript 2026-07-22 15:06:42 ubuntu@<ip-redacted> (sudo-run)
+
+$ ls -l /dev/rtc* 2>&1; cat /sys/class/rtc/rtc0/name 2>&1
+# rc=0 dur=2.8s
+lrwxrwxrwx 1 root root      4 Jul 21 11:15 /dev/rtc -> rtc0
+crw------- 1 root root 251, 0 Jul 21 11:15 /dev/rtc0
+rtc-rtca3 11c00800.rtc
+
+$ grep -H . /sys/class/rtc/rtc0/date /sys/class/rtc/rtc0/time /sys/class/rtc/rtc0/hctosys 2>&1
+# rc=0 dur=0.5s
+/sys/class/rtc/rtc0/date:2026-07-22
+/sys/class/rtc/rtc0/time:07:06:45
+/sys/class/rtc/rtc0/hctosys:1
+
+$ sudo -S sh -c 'hwclock -r; date -u "+system_utc: %Y-%m-%d %H:%M:%S.%N"'
+# rc=0 dur=1.5s
+2026-07-22 15:06:46.002293+08:00
+system_utc: 2026-07-22 07:06:46.434826821
+
+$ timedatectl 2>&1
+# rc=0 dur=0.5s
+               Local time: Wed 2026-07-22 15:06:47 CST
+           Universal time: Wed 2026-07-22 07:06:47 UTC
+                 RTC time: Wed 2026-07-22 07:06:47
+                Time zone: Asia/Taipei (CST, +0800)
+System clock synchronized: no
+              NTP service: active
+          RTC in local TZ: no
+
+$ timedatectl timesync-status 2>&1 | head -12
+# rc=0 dur=0.5s
+       Server: 103.186.118.217 (tw.pool.ntp.org)
+Poll interval: 16h (min: 30min; max 1d)
+         Leap: normal
+      Version: 4
+      Stratum: 2
+    Reference: D8EF230C
+    Precision: 1us (-24)
+Root distance: 2.235ms (max: 1min)
+       Offset: +3.559ms
+        Delay: 13.297ms
+       Jitter: 37.008ms
+ Packet count: 8

@@ -1,0 +1,70 @@
+# transcript 2026-07-18 08:33:53 ubuntu@<ip-redacted>
+
+$ systemctl is-active uav-wfb-tx
+# rc=0 dur=4.6s
+active
+
+$ ls -d /proc/device-tree/soc/*drp* /proc/device-tree/soc/*gpu* /proc/device-tree/soc/*opencva* /proc/device-tree/soc/*vcp* /proc/device-tree/soc/*vsp* /proc/device-tree/soc/*fcp* /proc/device-tree/soc/*isu* 2>/dev/null
+# rc=0 dur=0.1s
+/proc/device-tree/soc/drp1@18000000
+/proc/device-tree/soc/drpai@16800000
+/proc/device-tree/soc/fcp@16470000
+/proc/device-tree/soc/gpu@14850000
+/proc/device-tree/soc/isum@16450000
+/proc/device-tree/soc/opencva@C0000000
+/proc/device-tree/soc/vcp4@16400000
+/proc/device-tree/soc/vcp4@16410000
+/proc/device-tree/soc/vsp@16480000
+
+$ for d in /proc/device-tree/soc/*drp* /proc/device-tree/soc/*gpu* /proc/device-tree/soc/*opencva* /proc/device-tree/soc/*vcp* /proc/device-tree/soc/*vsp* /proc/device-tree/soc/*fcp* /proc/device-tree/soc/*isu*; do s=$(tr -d "\0" < "$d/status" 2>/dev/null); echo "$d ${s:-nostatus}"; done
+# rc=0 dur=0.1s
+/proc/device-tree/soc/drp1@18000000 okay
+/proc/device-tree/soc/drpai@16800000 okay
+/proc/device-tree/soc/gpu@14850000 okay
+/proc/device-tree/soc/opencva@C0000000 okay
+/proc/device-tree/soc/vcp4@16400000 nostatus
+/proc/device-tree/soc/vcp4@16410000 nostatus
+/proc/device-tree/soc/vsp@16480000 nostatus
+/proc/device-tree/soc/fcp@16470000 nostatus
+/proc/device-tree/soc/isum@16450000 nostatus
+[stderr] bash: line 1: /proc/device-tree/soc/vcp4@16400000/status: No such file or directory
+bash: line 1: /proc/device-tree/soc/vcp4@16410000/status: No such file or directory
+bash: line 1: /proc/device-tree/soc/vsp@16480000/status: No such file or directory
+bash: line 1: /proc/device-tree/soc/fcp@16470000/status: No such file or directory
+bash: line 1: /proc/device-tree/soc/isum@16450000/status: No such file or directory
+
+$ for d in /proc/device-tree/soc/*gpt*; do s=$(tr -d "\0" < "$d/status" 2>/dev/null); echo "$d ${s:-nostatus}"; done
+# rc=0 dur=0.2s
+/proc/device-tree/soc/gpt@13010000 okay
+/proc/device-tree/soc/gpt@13010100 disabled
+/proc/device-tree/soc/gpt@13010200 disabled
+/proc/device-tree/soc/gpt@13010300 disabled
+/proc/device-tree/soc/gpt@13010400 disabled
+/proc/device-tree/soc/gpt@13010500 disabled
+/proc/device-tree/soc/gpt@13010600 disabled
+/proc/device-tree/soc/gpt@13010700 disabled
+/proc/device-tree/soc/gpt@13020000 disabled
+/proc/device-tree/soc/gpt@13020100 disabled
+/proc/device-tree/soc/gpt@13020200 disabled
+/proc/device-tree/soc/gpt@13020300 disabled
+/proc/device-tree/soc/gpt@13020400 disabled
+/proc/device-tree/soc/gpt@13020500 disabled
+/proc/device-tree/soc/gpt@13020600 disabled
+/proc/device-tree/soc/gpt@13020700 disabled
+
+$ for d in /proc/device-tree/soc/ethernet@* /proc/device-tree/soc/mmc@*; do s=$(tr -d "\0" < "$d/status" 2>/dev/null); echo "$d ${s:-nostatus}"; done
+# rc=0 dur=0.1s
+/proc/device-tree/soc/ethernet@15C30000 okay
+/proc/device-tree/soc/ethernet@15C40000 disabled
+/proc/device-tree/soc/mmc@15c00000 okay
+/proc/device-tree/soc/mmc@15c10000 disabled
+/proc/device-tree/soc/mmc@15c20000 disabled
+
+$ for d in /proc/device-tree/soc/*csi* /proc/device-tree/soc/*cru*; do s=$(tr -d "\0" < "$d/status" 2>/dev/null); echo "$d ${s:-nostatus}"; done
+# rc=0 dur=0.1s
+/proc/device-tree/soc/csi20@16000400 okay
+/proc/device-tree/soc/csi21@16010400 okay
+/proc/device-tree/soc/csi22@16020400 disabled
+/proc/device-tree/soc/csi23@16030400 disabled
+/proc/device-tree/soc/*cru* nostatus
+[stderr] bash: line 1: /proc/device-tree/soc/*cru*/status: No such file or directory

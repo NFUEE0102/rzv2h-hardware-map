@@ -1,0 +1,89 @@
+# transcript 2026-07-17 18:58:53 ubuntu@<ip-redacted>
+
+$ systemctl is-active uav-wfb-tx
+# rc=0 dur=0.4s
+active
+
+$ uname -a
+# rc=0 dur=0.1s
+Linux ubuntu 6.10.14-arm64-renesas #2 SMP PREEMPT Thu Jun 11 10:46:49 UTC 2026 aarch64 aarch64 aarch64 GNU/Linux
+
+$ cat /etc/os-release | head -3
+# rc=0 dur=0.1s
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+
+$ sudo -n true && echo SUDO_OK || echo SUDO_NEEDS_PASSWORD
+# rc=0 dur=0.1s
+SUDO_NEEDS_PASSWORD
+[stderr] sudo: a password is required
+
+$ tr -d "\0" < /proc/device-tree/model; echo
+# rc=0 dur=0.1s
+Renesas RDK ver1 based on r9a09g057h4
+
+$ find /proc/device-tree -name status -exec sh -c 'tr -d "\0" < "$1"; echo' _ {} \; | sort | uniq -c
+# rc=0 dur=0.1s
+
+$ ls /proc/device-tree/reserved-memory/
+# rc=0 dur=0.1s
+#address-cells
+cru_buffer@B4000000
+DRP-AI@240000000
+DRP-Codec@AFD00000
+frame_buffer@90000000
+image_buf@B0000000
+linux,cma@58000000
+linux,multimedia
+name
+OpenCVA@A8000000
+ranges
+#size-cells
+vdev0buffer@0x43200000
+vdev0vring0@0x43000000
+vdev0vring1@0x43050000
+
+$ cat /proc/mtd
+# rc=0 dur=0.1s
+dev:    size   erasesize  name
+mtd0: 0001d200 00001000 "bl2"
+mtd1: 001c2e00 00001000 "fip"
+mtd2: 00020000 00001000 "env"
+mtd3: 00e00000 00001000 "test-area"
+
+$ head -3 /proc/meminfo
+# rc=0 dur=0.1s
+MemTotal:       15565904 kB
+MemFree:        13045444 kB
+MemAvailable:   14554288 kB
+
+$ ls -l /dev/drpai0 /dev/drp1 /dev/mali0 /dev/media0 /dev/video0 /dev/dri/card0
+# rc=0 dur=0.1s
+crw-rw---- 1 root video 226,   0 Jul 17 11:21 /dev/dri/card0
+crw-rw-rw- 1 root root  234,   1 Jul 17 11:21 /dev/drp1
+crw-rw-rw- 1 root root  511,   0 Jul 17 11:21 /dev/drpai0
+crw-rw-rw- 1 root root   10, 125 Jul 17 11:20 /dev/mali0
+crw-rw---- 1 root video 250,   0 Jul 17 11:23 /dev/media0
+crw-rw---- 1 root video  81,   3 Jul 17 11:23 /dev/video0
+
+$ ls -l /dev/dri/by-path/
+# rc=0 dur=0.1s
+total 0
+lrwxrwxrwx 1 root root 8 Jul 17 11:21 platform-16460000.display-card -> ../card0
+
+$ ls /dev/i2c-*
+# rc=0 dur=0.1s
+/dev/i2c-3
+/dev/i2c-4
+/dev/i2c-8
+/dev/i2c-9
+
+$ dmesg | grep -iE "reserved|memory@"
+# rc=1 dur=0.1s
+
+$ dmesg | grep -i drp-ai
+# rc=1 dur=0.1s
+
+$ dmesg | grep -i dmac
+# rc=1 dur=0.1s

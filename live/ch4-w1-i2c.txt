@@ -1,0 +1,48 @@
+# transcript 2026-07-22 15:00:52 ubuntu@<ip-redacted>
+
+$ i2cdetect -l 2>&1 | sort -V
+# rc=0 dur=2.4s
+i2c-3	i2c       	Renesas RIIC adapter            	I2C adapter
+i2c-4	i2c       	Renesas RIIC adapter            	I2C adapter
+i2c-8	i2c       	Renesas RIIC adapter            	I2C adapter
+i2c-9	i2c       	Renesas RSCI I2C adapter        	I2C adapter
+
+$ echo "== bus 0"; i2cdetect -y -r 0 2>&1
+# rc=1 dur=0.1s
+== bus 0
+Error: Could not open file `/dev/i2c-0' or `/dev/i2c/0': No such file or directory
+
+$ echo "== bus 1"; i2cdetect -y -r 1 2>&1
+# rc=1 dur=0.1s
+== bus 1
+Error: Could not open file `/dev/i2c-1' or `/dev/i2c/1': No such file or directory
+
+$ echo "== bus 4 (camera/IMU removed - expect empty at 0x48/0x6a)"; i2cdetect -y -r 4 2>&1
+# rc=0 dur=0.1s
+== bus 4 (camera/IMU removed - expect empty at 0x48/0x6a)
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: 10 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- 64 -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --
+
+$ echo "== bus 9"; i2cdetect -y -r 9 2>&1
+# rc=0 dur=0.1s
+== bus 9
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:                         -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --
+
+$ echo "NOTE: i2c-8 (PMIC/clock) intentionally NOT scanned per G04 rule"
+# rc=0 dur=0.1s
+NOTE: i2c-8 (PMIC/clock) intentionally NOT scanned per G04 rule

@@ -1,0 +1,156 @@
+# transcript 2026-07-22 14:59:22 ubuntu@<ip-redacted>
+
+$ which gpioinfo gpioget gpiodetect; gpiodetect 2>&1
+# rc=0 dur=2.4s
+/usr/bin/gpioinfo
+/usr/bin/gpioget
+/usr/bin/gpiodetect
+gpiochip0 [gpio_dummy] (32 lines)
+gpiochip1 [10410000.pinctrl] (96 lines)
+
+$ gpioinfo 2>&1 | head -120
+# rc=0 dur=0.1s
+gpiochip0 - 32 lines:
+	line   0: "GP_DUMMY_1"       unused   input  active-high 
+	line   1: "GP_DUMMY_2"       unused   input  active-high 
+	line   2: "GP_DUMMY_3"       unused   input  active-high 
+	line   3: "GP_DUMMY_4"       unused   input  active-high 
+	line   4: "GP_DUMMY_5"       unused   input  active-high 
+	line   5: "GP_DUMMY_6"       unused   input  active-high 
+	line   6: "GP_DUMMY_7"       unused   input  active-high 
+	line   7: "GP_DUMMY_8"       unused   input  active-high 
+	line   8: "GP_DUMMY_9"       unused   input  active-high 
+	line   9: "GP_DUMMY_10" unused input active-high 
+	line  10: "GP_DUMMY_11" unused input active-high 
+	line  11: "GP_DUMMY_12" unused input active-high 
+	line  12: "GP_DUMMY_13" unused input active-high 
+	line  13: "GP_DUMMY_14" unused input active-high 
+	line  14: "GP_DUMMY_15" unused input active-high 
+	line  15: "GP_DUMMY_16" unused input active-high 
+	line  16: "GP_DUMMY_17" unused input active-high 
+	line  17: "GP_DUMMY_18" unused input active-high 
+	line  18: "GP_DUMMY_19" unused input active-high 
+	line  19: "GP_DUMMY_20" unused input active-high 
+	line  20: "GP_DUMMY_21" unused input active-high 
+	line  21: "GP_DUMMY_22" unused input active-high 
+	line  22: "GP_DUMMY_23" unused input active-high 
+	line  23: "GP_DUMMY_24" unused input active-high 
+	line  24: "GP_DUMMY_25" unused input active-high 
+	line  25: "GP_DUMMY_26" unused input active-high 
+	line  26: "GP_DUMMY_27" unused input active-high 
+	line  27: "GP_DUMMY_28" unused input active-high 
+	line  28: "GP_DUMMY_29" unused input active-high 
+	line  29: "GP_DUMMY_30" unused input active-high 
+	line  30: "GP_DUMMY_31" unused input active-high 
+	line  31: "GP_DUMMY_32" unused input active-high 
+gpiochip1 - 96 lines:
+	line   0:        "P00"       unused   input  active-high 
+	line   1:        "P01"       unused   input  active-high 
+	line   2:        "P02"       unused   input  active-high 
+	line   3:        "P03"       unused   input  active-high 
+	line   4:        "P04"       unused   input  active-high 
+	line   5:        "P05"       unused   input  active-high 
+	line   6:        "P06"       kernel   input  active-high [used]
+	line   7:        "P07"       kernel   input  active-high [used]
+	line   8:        "P10"       unused   input  active-high 
+	line   9:        "P11"       unused   input  active-high 
+	line  10:        "P12"       unused   input  active-high 
+	line  11:        "P13"       unused   input  active-high 
+	line  12:        "P14"       unused   input  active-high 
+	line  13:        "P15"       unused   input  active-high 
+	line  14:        "P16"       unused   input  active-high 
+	line  15:        "P17"       unused   input  active-high 
+	line  16:        "P20"       unused   input  active-high 
+	line  17:        "P21"       unused   input  active-high 
+	line  18:        "P22"       unused   input  active-high 
+	line  19:        "P23"       unused   input  active-high 
+	line  20:        "P24"       unused   input  active-high 
+	line  21:        "P25"       unused   input  active-high 
+	line  22:        "P26"       unused   input  active-high 
+	line  23:        "P27"       unused   input  active-high 
+	line  24:        "P30"       unused   input  active-high 
+	line  25:        "P31"       unused   input  active-high 
+	line  26:        "P32"       unused   input  active-high 
+	line  27:        "P33"       unused   input  active-high 
+	line  28:        "P34"       unused   input  active-high 
+	line  29:        "P35"       unused   input  active-high 
+	line  30:        "P36"       kernel   input  active-high [used]
+	line  31:        "P37"       kernel   input  active-high [used]
+	line  32:        "P40"       kernel   input  active-high [used]
+	line  33:        "P41"       kernel   input  active-high [used]
+	line  34:        "P42"       kernel   input  active-high [used]
+	line  35:        "P43"       unused   input  active-high 
+	line  36:        "P44"       unused   input  active-high 
+	line  37:        "P45"       unused   input  active-high 
+	line  38:        "P46"       unused   input  active-high 
+	line  39:        "P47"       unused   input  active-high 
+	line  40:        "P50"       unused   input  active-high 
+	line  41:        "P51"       unused   input  active-high 
+	line  42:        "P52"       unused   input  active-high 
+	line  43:        "P53"       unused   input  active-high 
+	line  44:        "P54"       unused   input  active-high 
+	line  45:        "P55"       unused   input  active-high 
+	line  46:        "P56"       unused   input  active-high 
+	line  47:        "P57"       unused   input  active-high 
+	line  48:        "P60"       kernel   input  active-high [used]
+	line  49:        "P61"       kernel   input  active-high [used]
+	line  50:        "P62"       kernel   input  active-high [used]
+	line  51:        "P63"       kernel   input  active-high [used]
+	line  52:        "P64"       kernel   input  active-high [used]
+	line  53:        "P65"       kernel   input  active-high [used]
+	line  54:        "P66"       unused   input  active-high 
+	line  55:        "P67"       unused  output  active-high 
+	line  56:        "P70"       unused   input  active-high 
+	line  57:        "P71"       unused   input  active-high 
+	line  58:        "P72"       kernel   input  active-high [used]
+	line  59:        "P73"       kernel   input  active-high [used]
+	line  60:        "P74"       unused   input  active-high 
+	line  61:        "P75"       unused   input  active-high 
+	line  62:        "P76"       unused   input  active-high 
+	line  63:        "P77"       unused   input  active-high 
+	line  64:        "P80"       kernel   input  active-high [used]
+	line  65:        "P81"       kernel   input  active-high [used]
+	line  66:        "P82"       unused   input  active-high 
+	line  67:        "P83"       unused   input  active-high 
+	line  68:        "P84"       unused   input  active-high 
+	line  69:        "P85"       unused   input  active-high 
+	line  70:        "P86"       kernel   input  active-high [used]
+	line  71:        "P87"       kernel   input  active-high [used]
+	line  72:        "P90"       kernel   input  active-high [used]
+	line  73:        "P91"       kernel   input  active-high [used]
+	line  74:        "P92"       kernel   input  active-high [used]
+	line  75:        "P93"       kernel   input  active-high [used]
+	line  76:        "P94"       kernel   input  active-high [used]
+	line  77:        "P95"       unused   input  active-high 
+	line  78:        "P96"       unused   input  active-high 
+	line  79:        "P97"       unused   input  active-high 
+	line  80:        "PA0" "SDHI0 VccQ"  output  active-high [used]
+	line  81:        "PA1" "regulator-vcc-sdhi0" output active-high [used]
+	line  82:        "PA2"   "can0_stb"  output  active-high [used]
+	line  83:        "PA3"   "can3_stb"  output  active-high [used]
+	line  84:        "PA4"       unused   input  active-high 
+	line  85:        "PA5"       kernel   input  active-high [used]
+
+$ gpioinfo 2>&1 | grep -c "unused"; gpioinfo 2>&1 | grep "unused" | grep -vi "output" | head -20
+# rc=0 dur=0.1s
+95
+	line   0: "GP_DUMMY_1"       unused   input  active-high 
+	line   1: "GP_DUMMY_2"       unused   input  active-high 
+	line   2: "GP_DUMMY_3"       unused   input  active-high 
+	line   3: "GP_DUMMY_4"       unused   input  active-high 
+	line   4: "GP_DUMMY_5"       unused   input  active-high 
+	line   5: "GP_DUMMY_6"       unused   input  active-high 
+	line   6: "GP_DUMMY_7"       unused   input  active-high 
+	line   7: "GP_DUMMY_8"       unused   input  active-high 
+	line   8: "GP_DUMMY_9"       unused   input  active-high 
+	line   9: "GP_DUMMY_10" unused input active-high 
+	line  10: "GP_DUMMY_11" unused input active-high 
+	line  11: "GP_DUMMY_12" unused input active-high 
+	line  12: "GP_DUMMY_13" unused input active-high 
+	line  13: "GP_DUMMY_14" unused input active-high 
+	line  14: "GP_DUMMY_15" unused input active-high 
+	line  15: "GP_DUMMY_16" unused input active-high 
+	line  16: "GP_DUMMY_17" unused input active-high 
+	line  17: "GP_DUMMY_18" unused input active-high 
+	line  18: "GP_DUMMY_19" unused input active-high 
+	line  19: "GP_DUMMY_20" unused input active-high

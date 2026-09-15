@@ -1,0 +1,75 @@
+# transcript 2026-07-22 15:05:23 ubuntu@<ip-redacted> (sudo-run)
+
+$ echo IyEvdXNyL2Jpbi9lbnYgcHl0aG9uMwoiIiJDQU4g5YWn6YOo6L+055Kw6amX6K2J77yI5p2/5LiK54ShIGNhbi11dGlsc++8jOS7pSBweXRob24gc29ja2V0IEFGX0NBTiDku6Pmm78gY2FuZHVtcC9jYW5zZW5k77yJ44CCCueUqOazle+8mnB5dGhvbjMgY2FudGVzdC5weSBjYW4wIOKAlOKAlCDplovlhanlgIsgQ0FOX1JBVyBzb2NrZXTvvIjkuIDmlLbkuIDnmbzvvInvvIwK6YCB5LiA562GIGlkPTB4MTIzIGRhdGE9REVBREJFRUbvvIwzIOenkuWFp+aUtuWIsOWNsyBSRUNFSVZFRO+8iHJjPTDvvInvvIzlkKbliYcgVElNRU9VVO+8iHJjPTHvvInjgIIiIiIKaW1wb3J0IHNvY2tldCwgc3RydWN0LCBzZWxlY3QsIHN5cwoKaWZjID0gc3lzLmFyZ3ZbMV0KcnggPSBzb2NrZXQuc29ja2V0KHNvY2tldC5BRl9DQU4sIHNvY2tldC5TT0NLX1JBVywgc29ja2V0LkNBTl9SQVcpCnJ4LmJpbmQoKGlmYywpKQp0eCA9IHNvY2tldC5zb2NrZXQoc29ja2V0LkFGX0NBTiwgc29ja2V0LlNPQ0tfUkFXLCBzb2NrZXQuQ0FOX1JBVykKdHguYmluZCgoaWZjLCkpCnBheWxvYWQgPSBiIlx4ZGVceGFkXHhiZVx4ZWYiCmZyYW1lID0gc3RydWN0LnBhY2soIj1JQjN4OHMiLCAweDEyMywgbGVuKHBheWxvYWQpLCBwYXlsb2FkLmxqdXN0KDgsIGIiXHgwMCIpKQp0eC5zZW5kKGZyYW1lKQpyLCBfLCBfID0gc2VsZWN0LnNlbGVjdChbcnhdLCBbXSwgW10sIDMuMCkKaWYgbm90IHI6CiAgICBwcmludCgiVElNRU9VVDogbm8gZnJhbWUgcmVjZWl2ZWQgaW4gMyBzIikKICAgIHN5cy5leGl0KDEpCmRhdGEgPSByeC5yZWN2KDE2KQpjaWQsIGRsYywgZGF0ID0gc3RydWN0LnVucGFjaygiPUlCM3g4cyIsIGRhdGEpCnByaW50KCJSRUNFSVZFRCBpZD0weCUwM1ggZGxjPSVkIGRhdGE9JXMiICUgKGNpZCwgZGxjLCBkYXRbOmRsY10uaGV4KCkpKQo= | base64 -d > /tmp/ch4-cantest.py && echo pushed
+# rc=0 dur=2.9s
+pushed
+
+$ sudo -S sh -c 'ip link set can0 up type can bitrate 500000 dbitrate 2000000 fd on loopback on 2>&1; echo inner_rc=$?'
+# rc=0 dur=0.5s
+RTNETLINK answers: Operation not supported
+inner_rc=2
+
+$ ip -details link show can0 | head -4
+# rc=0 dur=0.5s
+5: can0: <NOARP,ECHO> mtu 72 qdisc noop state DOWN mode DEFAULT group default qlen 10
+    link/can  promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 
+    can <FD> state STOPPED (berr-counter tx 0 rx 0) restart-ms 0 
+	  bitrate 500000 sample-point 0.875
+
+$ if ip link show can0 | grep -q "UP"; then python3 /tmp/ch4-cantest.py can0; echo test_rc=$?; else echo "can0 not UP - skip send"; fi
+# rc=0 dur=0.5s
+can0 not UP - skip send
+
+$ ip -statistics link show can0 | grep -A1 "RX:\|TX:"
+# rc=0 dur=0.5s
+    RX:  bytes packets errors dropped  missed   mcast           
+             0       0      0       0       0       0 
+    TX:  bytes packets errors dropped carrier collsns           
+             0       0      0       0       0       0
+
+$ sudo -S sh -c 'ip link set can0 down'
+# rc=0 dur=0.5s
+
+$ sudo -S sh -c 'ip link set can1 up type can bitrate 500000 dbitrate 2000000 fd on loopback on 2>&1; echo inner_rc=$?'
+# rc=0 dur=0.5s
+RTNETLINK answers: Operation not supported
+inner_rc=2
+
+$ ip -details link show can1 | head -4
+# rc=0 dur=0.5s
+6: can1: <NOARP,ECHO> mtu 72 qdisc noop state DOWN mode DEFAULT group default qlen 10
+    link/can  promiscuity 0  allmulti 0 minmtu 0 maxmtu 0 
+    can <FD> state STOPPED (berr-counter tx 0 rx 0) restart-ms 0 
+	  rcar_canfd: tseg1 2..128 tseg2 2..32 sjw 1..32 brp 1..1024 brp_inc 1
+
+$ if ip link show can1 | grep -q "UP"; then python3 /tmp/ch4-cantest.py can1; echo test_rc=$?; else echo "can1 not UP - skip send"; fi
+# rc=0 dur=0.5s
+can1 not UP - skip send
+
+$ ip -statistics link show can1 | grep -A1 "RX:\|TX:"
+# rc=0 dur=0.5s
+    RX:  bytes packets errors dropped  missed   mcast           
+             0       0      0       0       0       0 
+    TX:  bytes packets errors dropped carrier collsns           
+             0       0      0       0       0       0
+
+$ sudo -S sh -c 'ip link set can1 down'
+# rc=0 dur=0.5s
+
+$ ip -br link | grep can
+# rc=0 dur=0.5s
+can0             DOWN           <NOARP,ECHO> 
+can1             DOWN           <NOARP,ECHO>
+
+$ rm -f /tmp/ch4-cantest.py; sudo:true
+# rc=127 dur=0.5s
+[stderr] bash: line 1: sudo:true: command not found
+
+$ sudo -S sh -c 'dmesg | grep -i "can" | tail -6'
+# rc=0 dur=0.5s
+[    7.453361] rzg2l-du 16460000.display: [drm] Cannot find any crtc or sizes
+[    7.463591] rzg2l-du 16460000.display: [drm] Cannot find any crtc or sizes
+[   32.690566] tevs 4-0048: can not find tevs camera
+[99574.476768] rcar_canfd 12440000.can can0: incorrect/missing data bit-timing
+[99574.483796] rcar_canfd 12440000.can can0: open_candev() failed: -EINVAL
+[99574.490445] A link change request failed with some changes committed already. Interface can0 may have been left with an inconsistent configuration, please check.

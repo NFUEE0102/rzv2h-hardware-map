@@ -1,0 +1,30 @@
+# transcript 2026-07-17 19:01:25 ubuntu@<ip-redacted>
+
+$ systemctl is-active uav-wfb-tx
+# rc=0 dur=2.6s
+active
+
+$ hexdump -C /proc/device-tree/reserved-memory/DRP-AI@240000000/reg
+# rc=0 dur=0.1s
+00000000  00 00 00 02 40 00 00 00  00 00 00 00 20 00 00 00  |....@....... ...|
+00000010
+
+$ hexdump -C "/proc/device-tree/reserved-memory/linux,cma@58000000/reg"
+# rc=0 dur=0.1s
+00000000  00 00 00 00 58 00 00 00  00 00 00 00 28 00 00 00  |....X.......(...|
+00000010
+
+$ ls -la /dev/dma_heap/
+# rc=0 dur=0.1s
+total 0
+drwxr-xr-x  2 root root     60 Jan  1  1970 .
+drwxr-xr-x 18 root root  13920 Jul 17 11:23 ..
+crw-------  1 root root 252, 0 Jul 17 11:21 linux,cma@58000000
+
+$ ls -A /sys/class/pwm/ | wc -l
+# rc=0 dur=0.1s
+0
+
+$ uptime
+# rc=0 dur=0.1s
+ 19:01:28 up  7:40,  2 users,  load average: 1.00, 0.86, 0.84

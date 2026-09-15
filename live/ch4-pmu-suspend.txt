@@ -1,0 +1,8 @@
+# PMU s2idle 休眠實測 2026-07-24 (板上,地面站序列同步監看)
+$ date +%s; echo before-suspend
+1784867...  before-suspend
+$ sudo rtcwake -m freeze -s 45
+# 板進 s2idle → 【未如期喚醒】: RTC alarm(rtcwake -m no 設得起)未 fire 喚醒 s2idle,
+#   網路/SSH 斷,序列送換行讀回 0 bytes → 板凍結。
+# 結論: 此板 s2idle 無可用喚醒源(RTC alarm 可設不可喚醒/序列非喚醒源),
+#   最終以【實體斷電重開】救回(up 1 min 確認)。headless 板勿 suspend。

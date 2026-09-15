@@ -1,0 +1,31 @@
+# transcript 2026-07-22 15:13:28 ubuntu@<ip-redacted>
+
+$ date; uptime -p; awk "{print \"uptime_sec=\"\$1}" /proc/uptime
+# rc=0 dur=5.9s
+Wed Jul 22 03:13:33 PM CST 2026
+up 0 minutes
+uptime_sec=52.51
+
+$ who -b
+# rc=0 dur=0.1s
+         system boot  2026-07-22 15:12
+
+$ dmesg | grep -i "watchdog\|reset\|Booting Linux" | head -10
+# rc=0 dur=0.1s
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x412fd050]
+[    2.971755] dwc-eth-dwmac 15c30000.ethernet: Enable RX Mitigation via HW Watchdog Timer
+
+$ cat /sys/class/thermal/thermal_zone0/temp /sys/class/thermal/thermal_zone1/temp
+# rc=0 dur=0.1s
+36000
+36000
+
+$ pgrep -af mdc_tx; echo pgrep_rc=$?
+# rc=0 dur=0.3s
+722 bash -c pgrep -af mdc_tx; echo pgrep_rc=$?
+pgrep_rc=0
+
+$ ip -br link | grep can
+# rc=0 dur=0.2s
+can0             DOWN           <NOARP,ECHO> 
+can1             DOWN           <NOARP,ECHO>

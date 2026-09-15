@@ -1,0 +1,28 @@
+# transcript 2026-07-22 15:07:51 ubuntu@<ip-redacted>
+
+$ gst-inspect-1.0 omxh264enc 2>&1 | grep -E "Klass|Rank|Long-name" ; gst-inspect-1.0 vspmfilter 2>&1 | grep -E "Klass|Rank|Long-name"
+# rc=0 dur=2.7s
+  Rank                     primary + 256 (512)
+  Long-name                OpenMAX H.264 Video Encoder
+  Klass                    Codec/Encoder/Video/Hardware
+  Rank                     none (0)
+  Long-name                Colorspace and Video Size Converter with VSPM
+  Klass                    Filter/Converter/Video
+
+$ time gst-launch-1.0 videotestsrc num-buffers=300 ! video/x-raw,width=1920,height=1080 ! vspmfilter ! omxh264enc ! fakesink 2>&1; echo pipeline_rc=$?
+# rc=0 dur=6.5s
+Setting pipeline to PAUSED ...
+Pipeline is PREROLLING ...
+Pipeline is PREROLLED ...
+Setting pipeline to PLAYING ...
+Redistribute latency...
+New clock: GstSystemClock
+Got EOS from element "pipeline0".
+Execution ended after 0:00:05.973212316
+Setting pipeline to NULL ...
+Freeing pipeline ...
+pipeline_rc=0
+[stderr] 
+real	0m6.407s
+user	0m6.215s
+sys	0m0.402s

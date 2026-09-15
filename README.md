@@ -1,9 +1,11 @@
 # RZ/V2H Hardware Resource Map
 
+Languages: English (this page) · [繁體中文](zh-TW/README.md)
+
 A from-scratch, verify-everything map of what hardware actually exists on a
-Renesas RZ/V2H RDK board (SoC part number R9A09G057H42), what state each
-piece is in, and how to check that state yourself instead of taking anyone's
-word for it — including this document's.
+Renesas RZ/V2H RDK board (SoC part number R9A09G057H44GBG, the RZ/V2HP
+variant), what state each piece is in, and how to check that state yourself
+instead of taking anyone's word for it — including this document's.
 
 ## Why this exists
 
@@ -29,10 +31,10 @@ file:
 |---|---|---|
 | **Enabled** | Device tree marked `okay`, Linux driver bound, a usable `/dev` or sysfs node exists | Ready to use |
 | **Partially Enabled** | Multiple instances of the same hardware class exist; only some are `okay` in the device tree | The enabled ones work; the rest need a DT change |
-| **Present · Not Exposed to Linux** | The silicon has it, but running Linux has no driver node for it — only reachable via firmware (u-boot/CM33/CR8) or an external probe | Not broken — it's just not Linux's to manage |
+| **Present · Not Exposed to Linux** | The silicon has it, but running Linux has no driver node for it — only reachable via firmware (U-Boot/CM33/CR8) or an external probe | Not broken — it's just not Linux's to manage |
 | **Reserved** | The hardware is enabled, but the whole block is claimed by boot firmware / remoteproc / a memory carveout, and never added to Linux's general-purpose pool | Exists, but not available for reuse |
 | **Disabled** | Device tree explicitly marks it `disabled` | Needs a DT change *and* the hardware hooked up to come alive |
-| **Not Populated** | This exact silicon (R9A09G057**H42**) simply doesn't have the module — a sibling part number does | Stop looking here; it's not on this chip |
+| **Not Populated** | This exact silicon (R9A09G057**H44**) simply doesn't have the module — a sibling part number does | Stop looking here; it's not on this chip |
 
 Every "I looked for X and didn't find it" in this repo resolves to exactly
 one of these six, and each file tells you which one and why.
@@ -66,7 +68,7 @@ measurement, not a guess"), not as links you're expected to follow. Where a
 claim was verified directly against Renesas's official hardware manual or
 datasheet, the citation says so explicitly (manual section number, page
 range). Where it was carried over from one of those internal documents
-without independently re-checking the original page, that's flagged too —
+without independently checking the original page, that's flagged too —
 this map draws a hard, honest line between "I read this myself" and
 "someone else's notes say this," and preserves that line in translation.
 
@@ -74,6 +76,16 @@ The official Renesas documents themselves (`r01uh1032` hardware manual,
 `r01ds0429` datasheet) are not included — they're Renesas's copyrighted
 material. `99-official-documentation-guide.md` tells you what to look for
 and where.
+
+## Source and sync status
+
+The content here mirrors the internal handbook chapter "全板硬體資源地圖"
+(Full-Board Hardware Resource Map) as of **2026-09-12**, and the English text
+has been updated to match that state. The Traditional Chinese originals of
+all ten chapter files are kept alongside the translation in
+[`zh-TW/`](zh-TW/README.md), so you can check any passage against the source
+it was translated from. [CHANGELOG.md](CHANGELOG.md) records what changed in
+each sync.
 
 ## Provenance
 

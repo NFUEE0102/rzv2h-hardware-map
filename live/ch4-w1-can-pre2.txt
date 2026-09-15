@@ -1,0 +1,21 @@
+# transcript 2026-07-22 15:02:02 ubuntu@<ip-redacted>
+
+$ sudo -n -l 2>&1 | head -30
+# rc=0 dur=2.4s
+sudo: a password is required
+
+$ ls /usr/bin/can* /usr/local/bin/can* /usr/sbin/can* 2>&1; find / -name "candump" -maxdepth 4 2>/dev/null; echo done
+# rc=0 dur=0.7s
+ls: cannot access '/usr/bin/can*': No such file or directory
+ls: cannot access '/usr/local/bin/can*': No such file or directory
+ls: cannot access '/usr/sbin/can*': No such file or directory
+done
+
+$ python3 -c "import socket; print(hasattr(socket,\"AF_CAN\"), hasattr(socket,\"CAN_RAW\"))" 2>&1
+# rc=0 dur=0.2s
+True True
+
+$ id; groups
+# rc=0 dur=0.1s
+uid=1000(ubuntu) gid=1000(ubuntu) groups=1000(ubuntu),4(adm),20(dialout),24(cdrom),27(sudo),29(audio),30(dip),44(video),46(plugdev),101(lxd),1001(spi),1002(i2c),1003(gpio)
+ubuntu adm dialout cdrom sudo audio dip video plugdev lxd spi i2c gpio

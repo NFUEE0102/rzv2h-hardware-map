@@ -1,0 +1,29 @@
+# transcript 2026-07-22 15:11:32 ubuntu@<ip-redacted> (sudo-run)
+
+$ sudo -S sh -c 'which wdctl && wdctl /dev/watchdog0 2>&1; echo wdctl_rc=$?'
+# rc=0 dur=2.8s
+/usr/bin/wdctl
+Device:        /dev/watchdog0
+Identity:      Renesas RZ/V2H WDT Watchdog [version 0]
+Timeout:       60 seconds
+Pre-timeout:    0 seconds
+FLAG           DESCRIPTION               STATUS BOOT-STATUS
+KEEPALIVEPING  Keep alive ping reply          1           0
+MAGICCLOSE     Supports magic close char      0           0
+SETTIMEOUT     Set timeout (in seconds)       0           0
+wdctl_rc=0
+
+$ date "+trigger_time: %Y-%m-%d %H:%M:%S"
+# rc=0 dur=0.5s
+trigger_time: 2026-07-22 15:11:35
+
+$ sudo -S sh -c '> /dev/watchdog0 ; echo bite_rc=$?'
+# rc=0 dur=0.5s
+bite_rc=0
+
+$ sudo -S sh -c 'dmesg | tail -4'
+# rc=0 dur=0.5s
+[99574.476768] rcar_canfd 12440000.can can0: incorrect/missing data bit-timing
+[99574.483796] rcar_canfd 12440000.can can0: open_candev() failed: -EINVAL
+[99574.490445] A link change request failed with some changes committed already. Interface can0 may have been left with an inconsistent configuration, please check.
+[99974.088445] watchdog: watchdog0: watchdog did not stop!

@@ -1,0 +1,20 @@
+# transcript 2026-07-22 14:56:57 ubuntu@<ip-redacted>
+
+$ date; uptime
+# rc=0 dur=2.4s
+Wed Jul 22 02:57:00 PM CST 2026
+ 14:57:00 up 1 day,  3:31,  6 users,  load average: 1.37, 1.21, 1.08
+
+$ for z in /sys/class/thermal/thermal_zone*; do echo "== $z type=$(cat $z/type) temp=$(cat $z/temp)"; done
+# rc=0 dur=0.1s
+== /sys/class/thermal/thermal_zone0 type=sensor-thermal0 temp=37000
+== /sys/class/thermal/thermal_zone1 type=sensor-thermal1 temp=38000
+
+$ for z in /sys/class/thermal/thermal_zone*; do for t in $z/trip_point_*_type; do n=${t%_type}; echo "$z ${n##*/}: $(cat $n\_type) $(cat $n\_temp) hyst=$(cat $n\_hyst 2>/dev/null)"; done; done
+# rc=0 dur=0.1s
+/sys/class/thermal/thermal_zone0 trip_point_0: critical 120000 hyst=1000
+/sys/class/thermal/thermal_zone1 trip_point_0: critical 120000 hyst=1000
+
+$ grep -H . /sys/class/thermal/cooling_device*/type 2>/dev/null; echo rc=$?
+# rc=0 dur=0.1s
+rc=2

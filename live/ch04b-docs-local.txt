@@ -1,0 +1,53 @@
+# local transcript 2026-07-18 (VM, not board) — 4.4 官方文件宣稱核對
+# D=/home/user/claude-ops/projects/uav-research/references/RZ-V2H-docs
+
+$ ls -1 "$D"/*.pdf        # 7 份，檔名與草稿一致（依字母序）
+r01an7723ej0400-rzv2h-rzv2n-awo-example-program-startup-guide.pdf
+r01an7912ej0104-rz-family-dram-list.pdf
+r01ds0429ej0130-rzv2h.pdf
+r01qs0077ej0400-rzv2h-multi-os-pkg.pdf
+r01uh1032ej0130-rzv2h.pdf
+r01wp0022eu0100-rzv2h-drp-ai3.pdf
+r20an0842ea0401-rzv2h-evk-exampleprojects.pdf
+
+$ ls -la "$D"             # 大小核對（bytes）：1105559 / 434057 / 1924708 / 2254319 / 43861979 / 1396682 / 365249
+# → 1.1MB / 434KB / 1.9MB / 2.3MB / 43.9MB / 1.4MB / 365KB，皆與草稿一致
+
+$ grep -P "^\d+\tSECTION " "$D/_toc_full.txt"
+76	SECTION 1 OVERVIEW
+212	SECTION 2 PROCESSORS
+264	SECTION 3 MEMORY
+360	SECTION 4 SYSTEM
+1161	SECTION 5 TIMER
+1515	SECTION 6 HIGH-SPEED INTERFACE
+2500	SECTION 7 LOW-SPEED INTERFACE
+3772	SECTION 8 AUDIO
+3956	SECTION 9 IMAGE
+4690	SECTION 10 ELECTRICAL CHARACTERISTICS
+
+$ grep "Gigabit Ethernet" "$D/_toc_full.txt"
+1632	  6.3 Gigabit Ethernet Interface (GBETH)
+
+$ grep -c "CAN-FD" "$D/_toc_full.txt"
+9
+# 第一行（章行）= 3363	  7.9 CAN-FD Interface (CANFD)，其餘 8 行為暫存器小節
+
+$ grep -c "I2C" "$D/_toc_full.txt"
+40
+
+$ grep -P "^\d+\t  7\.7 " "$D/_toc_full.txt"
+2968	  7.7 I2C Bus Interface (RIIC)
+
+$ tail -4 "$D/_toc_full.txt"
+4792	  1.20
+4810	  1.30
+4815	Colophon
+4816	Back Cover
+
+$ grep -P "^\d+\t  \d+\.\d+ " "$D/_toc_full.txt"
+# 全部章級行已與草稿 4.4 各表逐一比對：2.2 p213、2.3 p251、2.4 p259、3.2 p265、3.4 p277、
+# 3.5 p352、4.2 p361、4.4 p620、4.5 p790、4.6 p800、4.7 p994、4.9 p1119、5.3 p1166、
+# 5.4 p1218、5.5 p1236、5.6 p1254、5.7 p1283、5.8 p1504、6.2 p1516、6.3 p1632、6.4 p1636、
+# 6.5 p1753、6.6 p2025、7.2 p2501、7.3 p2585、7.4 p2780、7.5 p2826、7.6 p2954、7.7 p2968、
+# 7.8 p3061、7.9 p3363、7.10 p3670、7.11 p3739、9.2 p3957、9.3 p4247、9.4 p4372、9.5 p4548、
+# 9.6 p4683、9.7 p4685；另 1.8 Address Map p167——全部一致，無出入

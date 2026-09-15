@@ -1,0 +1,93 @@
+# transcript 2026-07-17 23:13:34 ubuntu@<ip-redacted>
+
+$ df -h /
+# rc=0 dur=0.4s
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       235G   25G  201G  11% /
+
+$ lsblk
+# rc=0 dur=0.1s
+NAME        MAJ:MIN RM   SIZE RO TYPE MOUNTPOINTS
+mtdblock0    31:0    0 116.5K  1 disk 
+mtdblock1    31:1    0   1.8M  1 disk 
+mtdblock2    31:2    0   128K  1 disk 
+mtdblock3    31:3    0    14M  0 disk 
+mmcblk0     179:0    0 238.8G  0 disk 
+├─mmcblk0p1 179:1    0   200M  0 part 
+└─mmcblk0p2 179:2    0 238.6G  0 part /
+
+$ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors
+# rc=0 dur=0.1s
+conservative ondemand userspace powersave performance schedutil
+
+$ cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+# rc=0 dur=0.1s
+performance
+
+$ timedatectl status
+# rc=0 dur=0.4s
+               Local time: Fri 2026-07-17 23:13:35 CST
+           Universal time: Fri 2026-07-17 15:13:35 UTC
+                 RTC time: Fri 2026-07-17 15:13:36
+                Time zone: Asia/Taipei (CST, +0800)
+System clock synchronized: yes
+              NTP service: active
+          RTC in local TZ: no
+
+$ swapon --show; echo "(swapon exit=$?)"
+# rc=0 dur=0.1s
+(swapon exit=0)
+
+$ findmnt /tmp
+# rc=0 dur=0.1s
+TARGET SOURCE FSTYPE OPTIONS
+/tmp   tmpfs  tmpfs  rw,nosuid,nodev,relatime,size=2097152k
+
+$ gst-inspect-1.0 | grep -iE "omxh264|v4l2"
+# rc=0 dur=0.9s
+omx:  omxh264dec: OpenMAX H.264 Video Decoder
+omx:  omxh264enc: OpenMAX H.264 Video Encoder
+video4linux2:  v4l2deviceprovider (GstDeviceProviderFactory)
+video4linux2:  v4l2radio: Radio (video4linux2) Tuner
+video4linux2:  v4l2sink: Video (video4linux2) Sink
+video4linux2:  v4l2src: Video (video4linux2) Source
+
+$ python3 -c "import cv2; print(\"OpenCV:\", cv2.__version__)"
+# rc=0 dur=7.7s
+OpenCV: 4.6.0
+
+$ python3 -c "import onnxruntime; print(\"ONNX Runtime:\", onnxruntime.__version__)"
+# rc=0 dur=1.6s
+ONNX Runtime: 1.26.0
+[stderr] [0;93m2026-07-17 23:13:45.793308480 [W:onnxruntime:Default, device_discovery.cc:283 GetGpuDevices] Failed to detect devices under "/sys/class/drm/card0": device_discovery.cc:93 ReadFileContents Failed to open file: "/sys/class/drm/card0/device/vendor"[m
+
+$ ls /dev/drpai0
+# rc=0 dur=0.1s
+/dev/drpai0
+
+$ ls /dev/dri/card0
+# rc=0 dur=0.1s
+/dev/dri/card0
+
+$ dmesg | grep -iE "drpai|mali" | head -5
+# rc=0 dur=0.1s
+
+$ lsusb
+# rc=0 dur=0.1s
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+Bus 002 Device 002: ID 0e8d:7961 MediaTek Inc. Wireless_Device
+Bus 003 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 004 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub
+
+$ i2cdetect -l
+# rc=0 dur=0.1s
+i2c-3	i2c       	Renesas RIIC adapter            	I2C adapter
+i2c-4	i2c       	Renesas RIIC adapter            	I2C adapter
+i2c-8	i2c       	Renesas RIIC adapter            	I2C adapter
+i2c-9	i2c       	Renesas RSCI I2C adapter        	I2C adapter
+
+$ cat /sys/class/thermal/thermal_zone*/temp
+# rc=0 dur=0.1s
+40000
+40000

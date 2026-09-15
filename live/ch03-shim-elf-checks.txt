@@ -1,0 +1,125 @@
+# transcript 2026-07-17 18:35:01 ubuntu@<ip-redacted>
+
+$ ls ~/sample_yolox_cam/libshim | grep -c "libopencv.*so.409"
+# rc=0 dur=0.4s
+59
+
+$ ls ~/sample_yolox_cam/libshim
+# rc=0 dur=0.1s
+libjpeg.so.62
+libopencv_alphamat.so.409
+libopencv_aruco.so.409
+libopencv_barcode.so.409
+libopencv_bgsegm.so.409
+libopencv_bioinspired.so.409
+libopencv_calib3d.so.409
+libopencv_ccalib.so.409
+libopencv_core.so.409
+libopencv_cvv.so.409
+libopencv_datasets.so.409
+libopencv_dnn_objdetect.so.409
+libopencv_dnn.so.409
+libopencv_dnn_superres.so.409
+libopencv_dpm.so.409
+libopencv_face.so.409
+libopencv_features2d.so.409
+libopencv_flann.so.409
+libopencv_freetype.so.409
+libopencv_fuzzy.so.409
+libopencv_gapi.so.409
+libopencv_hdf.so.409
+libopencv_hfs.so.409
+libopencv_highgui.so.409
+libopencv_imgcodecs.so.409
+libopencv_img_hash.so.409
+libopencv_imgproc.so.409
+libopencv_intensity_transform.so.409
+libopencv_line_descriptor.so.409
+libopencv_mcc.so.409
+libopencv_ml.so.409
+libopencv_objdetect.so.409
+libopencv_optflow.so.409
+libopencv_phase_unwrapping.so.409
+libopencv_photo.so.409
+libopencv_plot.so.409
+libopencv_quality.so.409
+libopencv_rapid.so.409
+libopencv_reg.so.409
+libopencv_rgbd.so.409
+libopencv_saliency.so.409
+libopencv_sfm.so.409
+libopencv_shape.so.409
+libopencv_stereo.so.409
+libopencv_stitching.so.409
+libopencv_structured_light.so.409
+libopencv_superres.so.409
+libopencv_surface_matching.so.409
+libopencv_text.so.409
+libopencv_tracking.so.409
+libopencv_ts.so.409
+libopencv_videoio.so.409
+libopencv_video.so.409
+libopencv_videostab.so.409
+libopencv_viz.so.409
+libopencv_wechat_qrcode.so.409
+libopencv_xfeatures2d.so.409
+libopencv_ximgproc.so.409
+libopencv_xobjdetect.so.409
+libopencv_xphoto.so.409
+
+$ ls ~/sample_yolox_cam/ | grep -E "deploy|preprocess"
+# rc=1 dur=0.1s
+
+$ ls ~/sample_yolox_cam/logs | tail -n 8
+# rc=0 dur=0.1s
+2026-07-04_16-04-07_app_yolox_cam.log
+2026-07-04_16-06-08_app_yolox_cam.log
+2026-07-04_16-07-08_app_yolox_cam.log
+2026-07-04_16-32-21_app_yolox_cam.log
+2026-07-12_11-18-57_app_yolox_cam.log
+2026-07-12_14-33-23_app_yolox_cam.log
+2026-07-12_14-43-28_app_yolox_cam.log
+2026-07-17_11-23-05_app_yolox_cam.log
+
+$ journalctl -u weston.service -n 12 --no-pager 2>&1 | tail -n 12
+# rc=0 dur=0.5s
+Jul 17 18:34:59 ubuntu weston[80226]: [18:34:59.730] warning: no input devices found, but none required as per configuration.
+Jul 17 18:34:59 ubuntu weston[80226]: [18:34:59.731] DRM: head 'HDMI-A-1' found, connector 38 is disconnected.
+Jul 17 18:34:59 ubuntu weston[80226]: [18:34:59.732] Registered plugin API 'weston_drm_output_api_v1' of size 40
+Jul 17 18:34:59 ubuntu weston[80226]: [18:34:59.732] Registered plugin API 'weston_drm_virtual_output_api_v2' of size 48
+Jul 17 18:34:59 ubuntu weston[80226]: [18:34:59.732] Color manager: no-op
+Jul 17 18:34:59 ubuntu weston[80227]: [18:34:59.734] [seatd/seat.c:418] No clients on seat0 to activate
+Jul 17 18:34:59 ubuntu weston[80227]: [18:34:59.734] [seatd/seat.c:524] Closed client 1 on seat0
+Jul 17 18:34:59 ubuntu weston[80227]: [18:34:59.734] [seatd/seat.c:192] Removed client 1 from seat0
+Jul 17 18:34:59 ubuntu weston[80227]: [18:34:59.734] [seatd/client.c:471] Client disconnected
+Jul 17 18:34:59 ubuntu weston[80227]: [18:34:59.735] [libseat/backend/seatd.c:645] Stopped embedded seatd
+Jul 17 18:34:59 ubuntu systemd[1]: weston.service: Main process exited, code=exited, status=1/FAILURE
+Jul 17 18:34:59 ubuntu systemd[1]: weston.service: Failed with result 'exit-code'.
+
+$ readelf -d ~/sample_yolox_cam/app_yolox_cam | grep -c "libopencv"
+# rc=0 dur=0.1s
+48
+
+$ readelf -d ~/sample_yolox_cam/app_yolox_cam | grep opencv | head -n 4
+# rc=0 dur=0.1s
+ 0x0000000000000001 (NEEDED)             Shared library: [libopencv_gapi.so.409]
+ 0x0000000000000001 (NEEDED)             Shared library: [libopencv_stitching.so.409]
+ 0x0000000000000001 (NEEDED)             Shared library: [libopencv_ts.so.409]
+ 0x0000000000000001 (NEEDED)             Shared library: [libopencv_alphamat.so.409]
+
+$ nm -D --undefined-only ~/sample_yolox_cam/app_yolox_cam | grep -iE "gapi|ts|sfm|xfeatures2d" | head -n 10
+# rc=0 dur=0.1s
+                 U glGetShaderiv
+                 U puts@GLIBC_2.17
+                 U _ZN2cv11getTextSizeERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEidiPi
+                 U _ZN2cv7putTextERKNS_17_InputOutputArrayERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEENS_6Point_IiEEidNS_7Scalar_IdEEiib
+                 U _ZN3tvm7runtime10ModuleNode11GetFunctionERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEb
+                 U _ZN3tvm7runtime6Module12LoadFromFileERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEES9_
+                 U _ZN3tvm7runtime6Object26GetOrAllocRuntimeTypeIndexERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEjjjb
+                 U _ZN3tvm7runtime8Registry3GetERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE
+                 U _ZNKSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE12find_last_ofEPKcmm
+                 U _ZNKSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEE13find_first_ofEPKcmm@GLIBCXX_3.4.21
+
+$ cd ~/sample_yolox_cam && LD_LIBRARY_PATH=./libshim:. ldd ./app_yolox_cam | grep "not found"; echo "ldd-notfound-rc=$?"
+# rc=0 dur=0.4s
+ldd-notfound-rc=1

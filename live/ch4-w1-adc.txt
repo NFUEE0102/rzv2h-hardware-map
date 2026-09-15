@@ -1,0 +1,65 @@
+# transcript 2026-07-22 14:57:24 ubuntu@<ip-redacted>
+
+$ ls -l /sys/bus/iio/devices/ 2>&1; echo rc=$?
+# rc=0 dur=0.4s
+total 0
+lrwxrwxrwx 1 root root 0 Mar 24 21:45 iio:device0 -> ../../../devices/platform/soc/11c00000.adc/iio:device0
+rc=0
+
+$ for d in /sys/bus/iio/devices/iio:device*; do echo "== $d name=$(cat $d/name)"; ls $d; done 2>&1
+# rc=0 dur=0.1s
+== /sys/bus/iio/devices/iio:device0 name=rzv2h-adc
+in_voltage0_get_value
+in_voltage0_raw
+in_voltage1_get_value
+in_voltage1_raw
+in_voltage2_get_value
+in_voltage2_raw
+in_voltage3_get_value
+in_voltage3_raw
+in_voltage4_get_value
+in_voltage4_raw
+in_voltage5_get_value
+in_voltage5_raw
+in_voltage6_get_value
+in_voltage6_raw
+in_voltage7_get_value
+in_voltage7_raw
+name
+of_node
+power
+subsystem
+uevent
+waiting_for_supplier
+
+$ for d in /sys/bus/iio/devices/iio:device*; do echo "== $d"; for f in $d/in_voltage*_raw; do echo "${f##*/}=$(cat $f 2>&1)"; done; echo "scale=$(cat $d/in_voltage_scale 2>/dev/null || cat $d/scale 2>/dev/null || echo none)"; done
+# rc=0 dur=0.1s
+== /sys/bus/iio/devices/iio:device0
+in_voltage0_raw=2816
+in_voltage1_raw=2318
+in_voltage2_raw=1914
+in_voltage3_raw=1734
+in_voltage4_raw=1648
+in_voltage5_raw=1607
+in_voltage6_raw=1613
+in_voltage7_raw=1601
+scale=none
+
+$ grep -H . /sys/bus/iio/devices/iio:device*/in_voltage* 2>/dev/null | sort
+# rc=0 dur=0.1s
+/sys/bus/iio/devices/iio:device0/in_voltage0_get_value:2816
+/sys/bus/iio/devices/iio:device0/in_voltage0_raw:1311
+/sys/bus/iio/devices/iio:device0/in_voltage1_get_value:2318
+/sys/bus/iio/devices/iio:device0/in_voltage1_raw:1445
+/sys/bus/iio/devices/iio:device0/in_voltage2_get_value:1914
+/sys/bus/iio/devices/iio:device0/in_voltage2_raw:1541
+/sys/bus/iio/devices/iio:device0/in_voltage3_get_value:1734
+/sys/bus/iio/devices/iio:device0/in_voltage3_raw:1577
+/sys/bus/iio/devices/iio:device0/in_voltage4_get_value:1648
+/sys/bus/iio/devices/iio:device0/in_voltage4_raw:1614
+/sys/bus/iio/devices/iio:device0/in_voltage5_get_value:1607
+/sys/bus/iio/devices/iio:device0/in_voltage5_raw:1622
+/sys/bus/iio/devices/iio:device0/in_voltage6_get_value:1613
+/sys/bus/iio/devices/iio:device0/in_voltage6_raw:1652
+/sys/bus/iio/devices/iio:device0/in_voltage7_get_value:1601
+/sys/bus/iio/devices/iio:device0/in_voltage7_raw:1642
