@@ -1,5 +1,7 @@
 # RZ/V2H Hardware Resource Map
 
+> Maintained by the **Power Conversion Technology Research Center**, Department of Electrical Engineering, National Formosa University — <https://nfuee0102.com> ｜ 國立虎尾科技大學 電機工程系 電能轉換技術研究中心
+
 Languages: English (this page) · [繁體中文](zh-TW/README.md)
 
 A from-scratch, verify-everything map of what hardware actually exists on a
