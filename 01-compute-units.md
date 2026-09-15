@@ -1,5 +1,4 @@
-# 01 · Compute Units (4.2 Compute Units Deep Dive)
-
+# 01 · Compute Units
 > This file is the compute-units deep-dive file in the "04 · Whole-Board Hardware Resource Map" folder (corresponding to section number **4.2**). The chapter opener, learning objectives, the `<board IP>` placeholder, and the marking conventions, along with the 4.1 whole-board overview, are all in [00-overview-and-ip-enablement-map.md](00-overview-and-ip-enablement-map.md); where the text says "4.1" it refers to the 00 file, and "4.4" refers to the 99 file. Steps marked ✅ for on-board verification all come with a transcript filename, pointing to the on-board recordings under `live/` in the handbook folder (written as `../live/ch04*.txt` starting from this folder).
 
 ## Files in This Folder
@@ -8,8 +7,8 @@
 |---|---|
 | [00-overview-and-ip-enablement-map.md](00-overview-and-ip-enablement-map.md) | Chapter opener + 4.1 whole-board overview and enablement map + end-of-chapter recap / quick-reference / measured-data tables |
 | **01-compute-units.md** (this file) | A55 / R8 / M33 / GPU / DRP-AI3 deep dive: specs, benchmark measurements, capability-ceiling derivation; DRP1's position is in the 00 file's grouped summary table, with the deep dive in Chapter 3 |
-| [g2-video-capture-codec-display.md](g2-video-capture-codec-display.md) ~ [g8-debug-and-security.md](g8-debug-and-security.md) | Peripherals and interfaces, unit by unit: imaging (g2), audio (g3), memory and storage (g4), system backbone (g5), timing (g6), communication and sensing (g7), debug and security (g8) |
-| [99-official-documentation-guide.md](99-official-documentation-guide.md) | Which official document answers which question, and the `_toc_full.txt` quick-lookup trick |
+| [02-video-capture-codec-display.md](02-video-capture-codec-display.md) ~ [08-debug-and-security.md](08-debug-and-security.md) | Peripherals and interfaces, unit by unit: imaging (02), audio (03), memory and storage (04), system backbone (05), timing (06), communication and sensing (07), debug and security (08) |
+| [09-official-documentation-guide.md](09-official-documentation-guide.md) | Which official document answers which question, and the `_toc_full.txt` quick-lookup trick |
 
 ---
 
@@ -464,7 +463,7 @@ Earlier sections repeatedly mentioned that the A55 lacks aes/sha extensions — 
 | RSA-2048 sign/verify | 156 / 5809 ops/s | — | 05-compute-benchmark.md:75 |
 | ECDSA P-256 sign/verify | 6284 / 2333 ops/s | — | 05-compute-benchmark.md:76 |
 
-> ⚠️ **Warning** (engineering background, not a debugging incident): **Scenario** — you need to encrypt data in transit or at rest. **Symptom** — the A55 lacks ARMv8 Crypto Extensions, so AES/SHA can only run in software, with throughput pinned to the tens-of-MB/s range. **Cause** — `aes`/`sha2` are absent from the CPU flags. **Prevention/Handling** — encrypting a 4 Mbps video stream (needing roughly 0.5 MB/s) is comfortably within reach; but if you have a high-volume encrypted storage/transfer need, watch the bandwidth ceiling (single-core AES ~35–56 MB/s, 4-core ~137 MB/s) (Source: 05-compute-benchmark.md:79-80). One more thing to note for security design: on this H44 part you can't reach any hardware Security IP from Linux, and there's no `/dev/tee` either (TEE = Trusted Execution Environment, such as OP-TEE) — Security = N/A for this part number, i.e. Not Populated, as verified in the hardware manual's Table 1.1-1, p78 (see g8) — so **don't assume you can do high-volume encryption or hardware key isolation**; this throughput is enough for data signing (Source: 09-compute-capability.md:44).
+> ⚠️ **Warning** (engineering background, not a debugging incident): **Scenario** — you need to encrypt data in transit or at rest. **Symptom** — the A55 lacks ARMv8 Crypto Extensions, so AES/SHA can only run in software, with throughput pinned to the tens-of-MB/s range. **Cause** — `aes`/`sha2` are absent from the CPU flags. **Prevention/Handling** — encrypting a 4 Mbps video stream (needing roughly 0.5 MB/s) is comfortably within reach; but if you have a high-volume encrypted storage/transfer need, watch the bandwidth ceiling (single-core AES ~35–56 MB/s, 4-core ~137 MB/s) (Source: 05-compute-benchmark.md:79-80). One more thing to note for security design: on this H44 part you can't reach any hardware Security IP from Linux, and there's no `/dev/tee` either (TEE = Trusted Execution Environment, such as OP-TEE) — Security = N/A for this part number, i.e. Not Populated, as verified in the hardware manual's Table 1.1-1, p78 (see 08) — so **don't assume you can do high-volume encryption or hardware key isolation**; this throughput is enough for data signing (Source: 09-compute-capability.md:44).
 
 #### DRP-AI3 NPU Inference: Squeezing 145 ms Down to 15 ms
 

@@ -20,7 +20,7 @@ added since.
 - **Updated: SoC part number is R9A09G057H44GBG (the RZ/V2HP variant), not
   R9A09G057H42.** Corrected throughout `README.md`,
   `00-overview-and-ip-enablement-map.md`, `01-compute-units.md`,
-  `g2-video-capture-codec-display.md` and `g8-debug-and-security.md`.
+  `02-video-capture-codec-display.md` and `08-debug-and-security.md`.
   中文：本板 SoC 料號更正為 R9A09G057H44GBG（H44＝RZ/V2HP 版），原譯文誤植為
   R9A09G057H42。
 
@@ -170,7 +170,7 @@ added since.
 
 - **PMU s2idle warning.** On this board, s2idle suspend has no working wakeup
   source — the RTC alarm can be set but does not wake the system — so a
-  headless board must not be suspended. `g5` now carries this as a hard rule.
+  headless board must not be suspended. `05` now carries this as a hard rule.
   中文：新增 PMU s2idle 警告——本板 s2idle 休眠後無可用喚醒源（RTC 鬧鐘設得起
   但醒不來），headless 板一律不要 suspend。
 
@@ -195,10 +195,10 @@ added since.
   （只在預設映像檔可用、Ubuntu Desktop 可能不相容、GStreamer 外掛來自 apt）；
   仍不對該差異下結論。
 
-- **Serial console pointer.** `g8-debug-and-security.md` now states up front
+- **Serial console pointer.** `08-debug-and-security.md` now states up front
   that the first-line debugging tool is the CN8 UART serial console
   (FT234XD → SCIF0, 115200 8N1), not the CoreSight/JTAG hardware in that group.
-  中文：`g8` 開頭補上一句——日常除錯的第一工具是 CN8 的 UART 序列主控台
+  中文：`08` 開頭補上一句——日常除錯的第一工具是 CN8 的 UART 序列主控台
   （FT234XD → SCIF0，115200 8N1），不是本群組的 CoreSight／JTAG。
 
 - **Traditional Chinese originals.** The ten current Chinese chapter files are

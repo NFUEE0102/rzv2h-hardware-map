@@ -1,8 +1,8 @@
-# 04 · 全板硬體資源地圖
+# 00 · 全板硬體資源地圖
 
 這一章要把整片 RZ/V2H 板子攤成一張你可以**親手重建**的地圖：哪些硬體單元真的開著、哪些關著；會算數的那幾顆核心各自能撐到多快；介面還剩哪些空位可以接東西；以及遇到任何硬體問題時，該翻哪一份官方文件的哪一章。整章的態度只有一句話——**數據是拿來查證的，不是拿來信仰的**：每個數字都附量測條件與出處，每個狀態都附你自己能跑的驗證指令。
 
-本章是一個**資料夾**：本檔（00）是入口，放章首說明、4.1 全板總覽與章末的回顧／速查表／數據表；運算單元深入在 01 檔；周邊與介面按八大群組逐單元展開成 g2–g8 群組檔；官方文件查閱指路在 99 檔。
+本章是一個**資料夾**：本檔（00）是入口，放章首說明、4.1 全板總覽與章末的回顧／速查表／數據表；運算單元深入在 01 檔；周邊與介面按八大群組逐單元展開成 02–08 群組檔；官方文件查閱指路在 99 檔。
 
 ## 本章檔案導覽
 
@@ -10,16 +10,16 @@
 |---|---|
 | **00-總覽與IP啟用地圖.md**（本檔） | 章首、4.1 全板總覽：device tree 啟用地圖、「45／78」怎麼數、六格狀態詞、分群總表、保留區與時脈樹；章末重點回顧／速查表／實測數據表 |
 | [01-運算單元](01-compute-units.md) | 4.2 運算單元深入：A55／R8／M33／GPU／DRP-AI3 規格、逐項附條件的 benchmark 實測、「某演算法能跑到幾 Hz」的能力上限推導 |
-| [g2-影像擷取・編解碼與顯示](g2-video-capture-codec-display.md) | 相機→縮放→編解碼→顯示七單元逐一深講（CSI/CRU、ISU、ISP、VCD、VSP、LCDC/DU、DSI） |
-| [g3-音訊子系統](g3-audio-subsystem.md) | SSIU／SPDIF／PDM／SCU-ADMAC／ADG——SoC 層皆啟用、EVK 無實體 codec 接出 |
-| [g4-記憶體與儲存](g4-memory-and-storage.md) | 內部 SRAM／Boot ROM／LPDDR4X 控制器／xSPI NOR／SDHI-eMMC |
-| [g5-系統骨幹（中斷／時脈／電源／DMA／事件連結）](g5-system-backbone-interrupts-clocks-power-dma-event-link.md) | ICU＋GIC-600／CPG／PMU／DMAC／ELC |
-| [g6-計時系統（計時器／PWM）](g6-timing-system-timers-pwm.md) | SYC／GTM-OSTM／CMTW／GPT／POEG-PWM／WDT／RTC |
-| [g7-通訊與感測介面（序列／匯流排／網路／擴充／類比）](g7-communication-and-sensing-interfaces.md) | SCIF／RSCI／RSPI／I²C／I3C／CAN-FD／CRC／GPIO／USB／GBETH＋PTP／PCIe／ADC／TSU |
-| [g8-除錯與安全](g8-debug-and-security.md) | CoreSight／TrustZone／Security IP——「正確地不存在」也要驗證 |
-| [99-官方文件查閱指路](99-official-documentation-guide.md) | 資料夾裡九份官方文件各回答什麼問題、43.9 MB 硬體手冊怎麼用 `_toc_full.txt` 秒查 |
+| [02-影像擷取・編解碼與顯示](02-video-capture-codec-display.md) | 相機→縮放→編解碼→顯示七單元逐一深講（CSI/CRU、ISU、ISP、VCD、VSP、LCDC/DU、DSI） |
+| [03-音訊子系統](03-audio-subsystem.md) | SSIU／SPDIF／PDM／SCU-ADMAC／ADG——SoC 層皆啟用、EVK 無實體 codec 接出 |
+| [04-記憶體與儲存](04-memory-and-storage.md) | 內部 SRAM／Boot ROM／LPDDR4X 控制器／xSPI NOR／SDHI-eMMC |
+| [05-系統骨幹（中斷／時脈／電源／DMA／事件連結）](05-system-backbone-interrupts-clocks-power-dma-event-link.md) | ICU＋GIC-600／CPG／PMU／DMAC／ELC |
+| [06-計時系統（計時器／PWM）](06-timing-system-timers-pwm.md) | SYC／GTM-OSTM／CMTW／GPT／POEG-PWM／WDT／RTC |
+| [07-通訊與感測介面（序列／匯流排／網路／擴充／類比）](07-communication-and-sensing-interfaces.md) | SCIF／RSCI／RSPI／I²C／I3C／CAN-FD／CRC／GPIO／USB／GBETH＋PTP／PCIe／ADC／TSU |
+| [08-除錯與安全](08-debug-and-security.md) | CoreSight／TrustZone／Security IP——「正確地不存在」也要驗證 |
+| [99-官方文件查閱指路](09-official-documentation-guide.md) | 資料夾裡九份官方文件各回答什麼問題、43.9 MB 硬體手冊怎麼用 `_toc_full.txt` 秒查 |
 
-> **節號對應**：各檔內文出現「4.1」指本檔的總覽節、「4.2」指 01 檔、「4.4」指 99 檔；舊的「4.3 周邊與介面單元速覽」已逐單元展開成 g2–g8 群組檔（運算單元的定位表在本檔分群總表一）。標 ✅ 的板上複驗步驟均附 transcript 檔名，指向 handbook 資料夾下 `live/` 的板上實錄（自本資料夾起算為 `../live/ch04*.txt`）。
+> **節號對應**：各檔內文出現「4.1」指本檔的總覽節、「4.2」指 01 檔、「4.4」指 99 檔；舊的「4.3 周邊與介面單元速覽」已逐單元展開成 02–08 群組檔（運算單元的定位表在本檔分群總表一）。標 ✅ 的板上複驗步驟均附 transcript 檔名，指向 handbook 資料夾下 `live/` 的板上實錄（自本資料夾起算為 `../live/ch04*.txt`）。
 
 ## 本檔目錄
 
@@ -46,7 +46,7 @@
 
 - **硬體**：一片 RZ/V2H RDK 開發板（SoC 料號 R9A09G057H44GBG），已能開機並登入（序列主控台或 SSH 皆可，照前面章節完成的狀態即可）；本章不需要接任何額外週邊。
 - **軟體**：板上出貨映像檔——Ubuntu 24.04.4 LTS（aarch64）、核心（kernel）`6.10.14-arm64-renesas`；一個有 sudo 權限的帳號。你的映像檔版本若不同，查證結果可能略有出入，屆時以各節「怎麼自己查／動手驗證」的方法為準。
-- **文件**：你自己從 Renesas 下載、放在**你的 PC／工作站**上的官方文件資料夾（不是放在板子上；[99-官方文件查閱指路](99-official-documentation-guide.md) 會逐份介紹）。本手冊一律用相對路徑 `../../reference-docs/` 稱呼這個資料夾（自本資料夾起算）——請把它換成你實際存放的位置，或先 `cd` 進去再跑 99 檔的指令。
+- **文件**：你自己從 Renesas 下載、放在**你的 PC／工作站**上的官方文件資料夾（不是放在板子上；[99-官方文件查閱指路](09-official-documentation-guide.md) 會逐份介紹）。本手冊一律用相對路徑 `../../reference-docs/` 稱呼這個資料夾（自本資料夾起算）——請把它換成你實際存放的位置，或先 `cd` 進去再跑 99 檔的指令。
 - **前置章節**：你只需要會用 Linux 終端機基本操作（`ls`、`cat`、`grep`、`sudo`）；本章所有專有名詞第一次出現時都會就地解釋。
 
 > ⚠️ **注意（`<板子IP>` 佔位，全章適用）**：這片板子的網路位址由 DHCP 動態配發，**每次開機、每次重新租約都可能變**。本手冊一律以 `<板子IP>` 佔位、不寫死任何 IP；要 SSH 或連線前，先在板子的序列主控台（或已連上的終端機）執行 `ip a`，以當下實際查到的位址為準。
@@ -55,17 +55,17 @@
 > - 動手步驟一律標 **📼 依實錄**：步驟與「預期輸出」逐字取自板上紀錄檔（多為 2026-06-21 的探測與 benchmark），未經改寫；經板上重新複驗後會改標 ✅（本章的 ✅ 皆為 2026-07-17／2026-07-18 板上重執行，並逐處附 transcript 檔名指向 `live/ch04*.txt` 的實錄）；標 **⏸** 者為需要 benchmark 重負載或會干擾現役服務、複查時未重執行的步驟（依實錄）。這個 ✅ 與資源表格「狀態」欄的 ✅（驅動程式已綁定、可直接使用）是兩套不同的記號，請依上下文判讀。
 > - 數據標 **ESTIMATE** 者是由實測錨點外推的估計值，**不是量測值**；引用時必須與實測分開對待。
 > - 出處以「檔名:行號」註記，指向硬體調查與 benchmark 的過渡筆記及紀錄檔。少數以代號註記者對照如下：d03=`04-hardware-quickref.md`、d04=`05-compute-benchmark.md`、d05=`06-hardware-resource-map.md`、d06=`07-hardware-unit-usage-guide.md`、d07=`08-gpu-deep-dive.md`、d08=`09-compute-capability.md`、d18=官方文件勘查筆記（`datasheet.md`、`startup-guide.md`、`_toc_full.txt` 的讀取紀錄）。
-> - **兩套來源代號並存，回溯時一律以檔名為準、別用號碼互推**：本檔與 01 檔用上面這套 `dNN`（依序對應，**號碼不等於檔名數字**，例如 `d06`＝`07-hardware-unit-usage-guide.md`）；g2–g8 群組檔改用另一套 `docNN`，其中 `docNN` 就是「第 NN 號檔」（`doc06`＝`06-hardware-resource-map.md`、`doc07`＝`07-hardware-unit-usage-guide.md`）。兩套前綴與編號都不對齊——特別注意本檔的 `d06` 與群組檔的 `doc07` **指向同一個檔** `07-hardware-unit-usage-guide.md`。
+> - **兩套來源代號並存，回溯時一律以檔名為準、別用號碼互推**：本檔與 01 檔用上面這套 `dNN`（依序對應，**號碼不等於檔名數字**，例如 `d06`＝`07-hardware-unit-usage-guide.md`）；02–08 群組檔改用另一套 `docNN`，其中 `docNN` 就是「第 NN 號檔」（`doc06`＝`06-hardware-resource-map.md`、`doc07`＝`07-hardware-unit-usage-guide.md`）。兩套前綴與編號都不對齊——特別注意本檔的 `d06` 與群組檔的 `doc07` **指向同一個檔** `07-hardware-unit-usage-guide.md`。
 
 ---
 
 ## 4.1 全板資源總覽與啟用地圖
 
-一顆 RZ/V2H SoC 上塞了幾十個硬體 IP 區塊（IP＝intellectual property，矽智財——晶片裡一個個可重複使用的功能電路模組，與網路位址的「IP」無關）：四顆應用處理器、兩顆即時核、一顆系統管理核、一具 NPU（neural processing unit，神經網路處理器）、一具可重組處理器、一顆 GPU、一組視訊編解碼器、一整條影像處理管線，再加上一排 I²C／SPI／CAN／USB／PCIe／乙太網路等介面（這些匯流排與介面各是什麼、能接什麼，g2–g8 群組檔會逐一講）。做系統整合時，你第一個要回答的問題其實不是「這顆晶片**能**做什麼」，而是：
+一顆 RZ/V2H SoC 上塞了幾十個硬體 IP 區塊（IP＝intellectual property，矽智財——晶片裡一個個可重複使用的功能電路模組，與網路位址的「IP」無關）：四顆應用處理器、兩顆即時核、一顆系統管理核、一具 NPU（neural processing unit，神經網路處理器）、一具可重組處理器、一顆 GPU、一組視訊編解碼器、一整條影像處理管線，再加上一排 I²C／SPI／CAN／USB／PCIe／乙太網路等介面（這些匯流排與介面各是什麼、能接什麼，02–08 群組檔會逐一講）。做系統整合時，你第一個要回答的問題其實不是「這顆晶片**能**做什麼」，而是：
 
 > **這一片板子上，現在有哪些是真的開著、綁好了驅動程式、我馬上就能用的；哪些雖然矽片裡有，但目前是關的？**
 
-這一節把整片板子攤成一張地圖。先講清楚 device tree（裝置樹）如何決定一個 IP 是「啟用」還是「停用」——也就是後面各節反覆引用的那句「45 啟用／78 停用」到底從哪來、在數什麼。接著教你怎麼自己在板子上查證（不必相信任何一張表，指令跑下去就知道）。最後用幾張分群總表，把運算單元、加速器、介面匯流排、DMA／中斷、記憶體保留區、時脈樹一次列清，並在結尾回答「這張地圖對你的系統整合說了什麼」。各單元的深入規格與實測效能，放在 [01-運算單元](01-compute-units.md)（4.2）與 g2–g8 各群組檔。
+這一節把整片板子攤成一張地圖。先講清楚 device tree（裝置樹）如何決定一個 IP 是「啟用」還是「停用」——也就是後面各節反覆引用的那句「45 啟用／78 停用」到底從哪來、在數什麼。接著教你怎麼自己在板子上查證（不必相信任何一張表，指令跑下去就知道）。最後用幾張分群總表，把運算單元、加速器、介面匯流排、DMA／中斷、記憶體保留區、時脈樹一次列清，並在結尾回答「這張地圖對你的系統整合說了什麼」。各單元的深入規格與實測效能，放在 [01-運算單元](01-compute-units.md)（4.2）與 02–08 各群組檔。
 
 > **本節數據基準（未另註者皆適用此基準）**
 > 本節絕大多數狀態與數字，來自 2026-06-21 於板上實機探測。量測環境：
@@ -137,11 +137,11 @@ flowchart TD
 > **原因**：`45/78` 數的是 **device tree 節點**；`52` 數的是 **datasheet 功能區塊**；`49` 是**文件編號段落**。一個「功能區塊」在 device tree 裡常被拆成好幾個節點——例如 GPT 計時器 16 個 channel 就對應多個 `gpt@...` 節點（本板只有 `gpt@13010000` 是 `okay`，其餘 15 個節點 `disabled`）、USB 有多個 PHY（實體層收發器）子節點、DMAC 有兩個獨立實例；反過來，四顆 A55 組成的叢集在 device tree 裡只是**一個** `cpus` 節點。所以節點數天生就比功能區塊數細碎、數字更大。
 > **預防**：把 `45/78` 就當成「**這顆板子的 device tree 目前把多少個節點設成啟用／停用**」來讀，而不是「板子有幾個功能」。要談「功能區塊數」時，另用 datasheet 的口徑，且明講你用的是哪個分母。
 
-還有一件事值得先分清楚：**「停用（disabled）」不等於「不存在（absent）」**。78 個 `disabled` 節點，多半是矽片裡有這個硬體，只是這片板子的 device tree 沒把它打開。原因有兩種：一是腳位被別的功能 pin-mux 佔用（pin-mux〔腳位多工〕指一支實體接腳被多種功能共用、同一時間只能選一種，所以有些單元雖在矽片上、卻因腳位被佔而在這片板子上停用）；二是板上根本沒把對應的實體線路接出來。這跟「這顆型號根本沒有這個硬體」是兩回事。這個差別在你想「把某個停用的東西打開」時很關鍵——見下面停用清單旁的注意框。反過來還有「矽晶有、但 device tree 沒啟用」這種狀況：Mali-C55 ISP 就在這顆 H44（**RZ/V2HP** 版）矽晶裡（真硬體手冊 `r01uh1032` §1.1.2 Product Lineup、Table 1.1-1〔p78〕把料號 R9A09G057H44GBG 歸為 RZ/V2HP，ISP 欄逐字標 `Available (Mali-C55)`；板卡手冊 Page 11 元件表主晶片 U1「ISP&GPU」佐證），但當前 Linux 沒有它的節點（細節見 g2 群組檔）——注意 ISP 本身在 device tree 裡根本沒有節點，所以它不影響「45／78」那把尺。至於硬體 Security IP，真硬體手冊 `r01uh1032` Table 1.1-1〔p78〕（即上面坐實 ISP＝Available 的同一張 SKU 表）把本料號 Security 欄逐字標為 **N/A**——本料號**未搭載**（見 g8 群組檔）。
+還有一件事值得先分清楚：**「停用（disabled）」不等於「不存在（absent）」**。78 個 `disabled` 節點，多半是矽片裡有這個硬體，只是這片板子的 device tree 沒把它打開。原因有兩種：一是腳位被別的功能 pin-mux 佔用（pin-mux〔腳位多工〕指一支實體接腳被多種功能共用、同一時間只能選一種，所以有些單元雖在矽片上、卻因腳位被佔而在這片板子上停用）；二是板上根本沒把對應的實體線路接出來。這跟「這顆型號根本沒有這個硬體」是兩回事。這個差別在你想「把某個停用的東西打開」時很關鍵——見下面停用清單旁的注意框。反過來還有「矽晶有、但 device tree 沒啟用」這種狀況：Mali-C55 ISP 就在這顆 H44（**RZ/V2HP** 版）矽晶裡（真硬體手冊 `r01uh1032` §1.1.2 Product Lineup、Table 1.1-1〔p78〕把料號 R9A09G057H44GBG 歸為 RZ/V2HP，ISP 欄逐字標 `Available (Mali-C55)`；板卡手冊 Page 11 元件表主晶片 U1「ISP&GPU」佐證），但當前 Linux 沒有它的節點（細節見 02 群組檔）——注意 ISP 本身在 device tree 裡根本沒有節點，所以它不影響「45／78」那把尺。至於硬體 Security IP，真硬體手冊 `r01uh1032` Table 1.1-1〔p78〕（即上面坐實 ISP＝Available 的同一張 SKU 表）把本料號 Security 欄逐字標為 **N/A**——本料號**未搭載**（見 08 群組檔）。
 
 ### 先學會讀「狀態」：「找不到」有六種意思
 
-上面的 ✅／🟡／🟠 三個符號，描述的是「`okay` 節點有沒有綁到驅動程式、能不能馬上用」這一個維度。把視野再拉開——本章（含 g2–g8 各群組檔）在描述**任何一個硬體單元的板上狀態**時，用的是下面這六個狀態詞。先建立這個觀念，它會替你省下最多的除錯時間：**在這塊板子上，「某個硬體我在 Linux 裡找不到」不是一種狀況，而是六種完全不同的狀況**，處理方式南轅北轍。把它們混為一談，是新手在這塊板子上最常見、最耗時的坑。
+上面的 ✅／🟡／🟠 三個符號，描述的是「`okay` 節點有沒有綁到驅動程式、能不能馬上用」這一個維度。把視野再拉開——本章（含 02–08 各群組檔）在描述**任何一個硬體單元的板上狀態**時，用的是下面這六個狀態詞。先建立這個觀念，它會替你省下最多的除錯時間：**在這塊板子上，「某個硬體我在 Linux 裡找不到」不是一種狀況，而是六種完全不同的狀況**，處理方式南轅北轍。把它們混為一談，是新手在這塊板子上最常見、最耗時的坑。
 
 | 狀態標記 | 意思 | 你該怎麼想 |
 |---|---|---|
@@ -150,14 +150,14 @@ flowchart TD
 | **存在·Linux 未曝露** | 矽片上有這顆硬體，但執行中的 Linux 沒有對應的驅動程式節點；要靠韌體（u-boot／CM33／CR8）或外部探針才動得了（例：R8、CoreSight、ELC） | 不是壞掉，是「不歸 Linux 管」 |
 | **保留** | 硬體啟用了，但整塊已被開機韌體／remoteproc／carveout 占走，沒加進 Linux 的一般記憶體池（例：6 MB 內部 SRAM） | 存在但不開放挪用 |
 | **停用** | device-tree 明確標 `disabled`，介面被關掉（例：第 2 GbE、板上 eMMC 控制器） | 要改 DT 並接上硬體才會活 |
-| **未搭載** | 這顆矽片（R9A09G057**H44**）根本沒有這個模組，是別的料號才有（本料號缺哪些選配，看真硬體手冊 Table 1.1-1〔p78〕的 SKU 欄即可判定——例如硬體 Security IP 本料號標 N/A，見 g8） | 別找了，換做法 |
+| **未搭載** | 這顆矽片（R9A09G057**H44**）根本沒有這個模組，是別的料號才有（本料號缺哪些選配，看真硬體手冊 Table 1.1-1〔p78〕的 SKU 欄即可判定——例如硬體 Security IP 本料號標 N/A，見 08） | 別找了，換做法 |
 
-一個具體例子先埋在這裡，後面每一群都會再遇到它的變形：你在別人的教學裡看到 `/dev/dma_heap` 底下該有 system、cma 好幾個 heap，到這塊板子上一看卻只有一個 root 專用的 `linux,cma@58000000`（✅ 2026-07-17 板上實測，transcript：live/ch04-reserved-mem.txt；2026-06-21 的盤點紀錄甚至查無此目錄，出處 `07-hardware-unit-usage-guide.md:187`——兩案並陳，完整辨析見後面〈DMA、中斷與記憶體保留〉的注意框）——這不是「壞了」，連續緩衝從 CMA（Contiguous Memory Allocator，連續記憶體配置器——核心預留、專門用來配置實體位址連續之大塊緩衝的機制）區域（`0x58000000`）取即可。g2–g8 各群組檔的教學重點之一，就是教你把每個「找不到」正確歸到上面六格的哪一格。
+一個具體例子先埋在這裡，後面每一群都會再遇到它的變形：你在別人的教學裡看到 `/dev/dma_heap` 底下該有 system、cma 好幾個 heap，到這塊板子上一看卻只有一個 root 專用的 `linux,cma@58000000`（✅ 2026-07-17 板上實測，transcript：live/ch04-reserved-mem.txt；2026-06-21 的盤點紀錄甚至查無此目錄，出處 `07-hardware-unit-usage-guide.md:187`——兩案並陳，完整辨析見後面〈DMA、中斷與記憶體保留〉的注意框）——這不是「壞了」，連續緩衝從 CMA（Contiguous Memory Allocator，連續記憶體配置器——核心預留、專門用來配置實體位址連續之大塊緩衝的機制）區域（`0x58000000`）取即可。02–08 各群組檔的教學重點之一，就是教你把每個「找不到」正確歸到上面六格的哪一格。
 
 順帶把兩件常引起困惑的事在這裡講掉（出處 `07-hardware-unit-usage-guide.md:1,5,12`）：
 
-- **49 為什麼少於 52**：datasheet 方塊圖列 52 個功能區塊，調查文件實際編號的單元只有 49 段——因為 GTM 與 OSTM 其實是同一顆 8 通道硬體（詳見 g6 群組檔）、PWM 也不是獨立周邊而是靠 GPT＋POEG 產生（同見 g6）。
-- **這顆料號的能力盤點**：本板 SoC 是 **R9A09G057H44GBG**（H44＝**RZ/V2HP** 版；真硬體手冊 `r01uh1032` §1.1.2 Product Lineup、Table 1.1-1〔p78〕逐字把 R9A09G057H44GBG 歸為 RZ/V2HP、ISP 欄標 `Available (Mali-C55)`，並附 Remark『The ISP is only present in the RZ/V2HP products.』〔p823〕；板卡手冊 Page 11 元件表 U1「ISP&GPU」佐證）。**有** Mali-G31 GPU（啟用）；**矽晶含** Mali-C55 ISP，但當前 Linux device tree 未啟用它（影像走 CRU 純 DMA）；**硬體 Security IP**（加密引擎／TRNG〔真亂數產生器〕／secure-boot 加速器）本料號**未搭載**——真硬體手冊 Table 1.1-1〔p78〕（即上面那張 SKU 表）Security 欄標 N/A，板上也量到 Linux 沒有任何硬體加密介面。細節分別見 g2（ISP）與 g8（Security IP）群組檔。
+- **49 為什麼少於 52**：datasheet 方塊圖列 52 個功能區塊，調查文件實際編號的單元只有 49 段——因為 GTM 與 OSTM 其實是同一顆 8 通道硬體（詳見 06 群組檔）、PWM 也不是獨立周邊而是靠 GPT＋POEG 產生（同見 06）。
+- **這顆料號的能力盤點**：本板 SoC 是 **R9A09G057H44GBG**（H44＝**RZ/V2HP** 版；真硬體手冊 `r01uh1032` §1.1.2 Product Lineup、Table 1.1-1〔p78〕逐字把 R9A09G057H44GBG 歸為 RZ/V2HP、ISP 欄標 `Available (Mali-C55)`，並附 Remark『The ISP is only present in the RZ/V2HP products.』〔p823〕；板卡手冊 Page 11 元件表 U1「ISP&GPU」佐證）。**有** Mali-G31 GPU（啟用）；**矽晶含** Mali-C55 ISP，但當前 Linux device tree 未啟用它（影像走 CRU 純 DMA）；**硬體 Security IP**（加密引擎／TRNG〔真亂數產生器〕／secure-boot 加速器）本料號**未搭載**——真硬體手冊 Table 1.1-1〔p78〕（即上面那張 SKU 表）Security 欄標 N/A，板上也量到 Linux 沒有任何硬體加密介面。細節分別見 02（ISP）與 08（Security IP）群組檔。
 
 ### 怎麼自己查（device tree／sysfs／探測工具）
 
@@ -329,7 +329,7 @@ OF: reserved mem: 0x0000000240000000..0x000000025fffffff (524288 KiB) map reusab
 | `/boot/uEnv.txt` 的設定行 | 出廠預設 | 載入的 overlay | 作用 |
 |---|---|---|---|
 | `enable_overlay_can` | **`1`（已啟用）** | `rzv2h-rdk-1.0-can.dtbo` | CAN 介面 |
-| `enable_overlay_audio_codec` | 註解掉 | `rzv2h-rdk-1.0-audio-codec.dtbo` | 外接音訊 codec。**啟用後 micro-HDMI 音訊會被停用**（見 g3 檔） |
+| `enable_overlay_audio_codec` | 註解掉 | `rzv2h-rdk-1.0-audio-codec.dtbo` | 外接音訊 codec。**啟用後 micro-HDMI 音訊會被停用**（見 03 檔） |
 | `enable_overlay_spi` | 註解掉 | `rzv2h-rdk-1.0-ext-spi.dtbo` | 外接 SPI（`rsci_spi0`；`P50`=MOSI、`P51`=MISO、`P52`=SCK、`P53`=SS〔slave 模式〕） |
 | `enable_overlay_imx219` | `0` | `rzv2h-rdk-1.0-imx219.dtbo` | Raspberry Pi IMX219 相機（CSI20／CN5） |
 | `enable_overlay_tevs_cam0` | `0` | `rzv2h-rdk-1.0-tevs-cam0.dtbo` | TechNexion TEVS 相機掛 **CN5**（RIIC `i2c@14401400` → csi20）。⚠ **這個官方 overlay 是 `data-lanes = <2>`（2-lane）** |
@@ -416,7 +416,7 @@ MemAvailable:  14863188 kB
 | `pllvdo` | 1.26 GHz | ISU／視訊（630 MHz） |
 | `plldsi` | 297 MHz | MIPI-DSI／LCDC |
 
-> 💡 **提示**：上表是「主要 PLL → 子系統」的精簡摘要，各 PLL 的頻率值取自開發文件盤點、未逐一對一手手冊核實；帶一手背書的完整 11 顆 PLL 對照（含各 PLL 服務對象）在 g5〈系統骨幹〉群組檔（出處 r01uh1032 §4.4.1，p620–621）。要看整棵時脈樹的**實際**頻率與各時脈的啟用計數，跑 `sudo cat /sys/kernel/debug/clk/clk_summary | less`，以板上實查為準。
+> 💡 **提示**：上表是「主要 PLL → 子系統」的精簡摘要，各 PLL 的頻率值取自開發文件盤點、未逐一對一手手冊核實；帶一手背書的完整 11 顆 PLL 對照（含各 PLL 服務對象）在 05〈系統骨幹〉群組檔（出處 r01uh1032 §4.4.1，p620–621）。要看整棵時脈樹的**實際**頻率與各時脈的啟用計數，跑 `sudo cat /sys/kernel/debug/clk/clk_summary | less`，以板上實查為準。
 
 ### 這張地圖對你的系統整合說了什麼
 
@@ -476,7 +476,7 @@ MemAvailable:  14863188 kB
 
 ## 本章速查表
 
-板上探測與驗證常用指令一覽（詳細用法與預期輸出見「出現於」欄指到的檔案：「本檔 4.1」＝本檔各節；「01 檔」＝[01-運算單元](01-compute-units.md)；「gN 檔」＝對應群組檔；「99 檔」＝[99-官方文件查閱指路](99-official-documentation-guide.md)）：
+板上探測與驗證常用指令一覽（詳細用法與預期輸出見「出現於」欄指到的檔案：「本檔 4.1」＝本檔各節；「01 檔」＝[01-運算單元](01-compute-units.md)；「gN 檔」＝對應群組檔；「99 檔」＝[99-官方文件查閱指路](09-official-documentation-guide.md)）：
 
 | 指令 | 用途 | 出現於 |
 |---|---|---|
@@ -490,7 +490,7 @@ MemAvailable:  14863188 kB
 | `sudo cat /sys/kernel/debug/dmaengine/summary` | DMA 通道與擁有者驅動程式（32 條） | 本檔 4.1 |
 | `sudo cat /sys/kernel/debug/pm_genpd/pm_genpd_summary` | power-domain（genpd）狀態 | 本檔 4.1 |
 | `watch -n1 'cat /proc/interrupts'` | 即時 IRQ 計數（誰在動） | 本檔 4.1 |
-| `cat /proc/mtd` | xSPI NOR 的 MTD 分割區（bl2/fip/env/test-area） | 本檔 4.1、g4 檔 |
+| `cat /proc/mtd` | xSPI NOR 的 MTD 分割區（bl2/fip/env/test-area） | 本檔 4.1、04 檔 |
 | `cat /proc/meminfo` | RAM 實際容量（MemTotal 15565904 kB） | 本檔 4.1 |
 | `lscpu \| grep -E 'Model name\|CPU max\|CPU min\|Core\(s\)'` | 確認 A55 型號與時脈範圍 | 01 檔 |
 | `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq` | 目前頻率（1700000 kHz） | 01 檔 |
@@ -506,14 +506,14 @@ MemAvailable:  14863188 kB
 | `sudo apt install -y ocl-icd-opencl-dev opencl-headers clinfo` ＋ 註冊 `mali.icd` | 啟用 OpenCL | 01 檔 |
 | `clinfo \| grep -iE 'Platform\|Device Name\|OpenCL'` | OpenCL 平台確認（Mali-G31 / 3.0） | 01 檔 |
 | `eglinfo \| grep -i renderer` | GPU 渲染器身分（Mali-G31） | 01 檔 |
-| `gst-inspect-1.0 omxh265enc` | 確認 VCD 硬體編碼外掛是否可用 | 本檔 4.1、g2 檔 |
-| `ls /dev/i2c-*` | 啟用中的 I²C bus（i2c-3/4/8/9） | 本檔 4.1、g7 檔 |
-| `i2cget -y 4 0x6a 0x0f` | 讀 IMU WHO_AM_I（預期 `0x22`；勿掃 i2c-8） | g7 檔 |
-| `gpioset $(gpiofind PA2)=0` | 釋放 CAN 收發器 standby（帶起 can0 前必做） | g7 檔 |
-| `ip link set can0 up` | 帶起 CAN 介面（先做上一條） | g7 檔 |
-| `cat /sys/power/state` | suspend 模式支援（freeze mem disk） | g5 檔 |
-| `cat /proc/asound/cards` | 音效卡（rcarsound） | g3 檔 |
-| `ls /dev/tee* 2>/dev/null; ls -la /dev/dma_heap/; ls -A /sys/class/pwm \| wc -l` | 三連檢：TEE 應不存在、dma_heap 應只有 linux,cma、pwm 應為 0 | g5／g6／g8 檔 |
+| `gst-inspect-1.0 omxh265enc` | 確認 VCD 硬體編碼外掛是否可用 | 本檔 4.1、02 檔 |
+| `ls /dev/i2c-*` | 啟用中的 I²C bus（i2c-3/4/8/9） | 本檔 4.1、07 檔 |
+| `i2cget -y 4 0x6a 0x0f` | 讀 IMU WHO_AM_I（預期 `0x22`；勿掃 i2c-8） | 07 檔 |
+| `gpioset $(gpiofind PA2)=0` | 釋放 CAN 收發器 standby（帶起 can0 前必做） | 07 檔 |
+| `ip link set can0 up` | 帶起 CAN 介面（先做上一條） | 07 檔 |
+| `cat /sys/power/state` | suspend 模式支援（freeze mem disk） | 05 檔 |
+| `cat /proc/asound/cards` | 音效卡（rcarsound） | 03 檔 |
+| `ls /dev/tee* 2>/dev/null; ls -la /dev/dma_heap/; ls -A /sys/class/pwm \| wc -l` | 三連檢：TEE 應不存在、dma_heap 應只有 linux,cma、pwm 應為 0 | 05／06／08 檔 |
 | `grep -E "^[0-9]+	SECTION " ../../reference-docs/_toc_full.txt` | 硬體手冊 10 個 SECTION 起始頁 | 99 檔 |
 | `grep "<單元名>" ../../reference-docs/_toc_full.txt` | 查某單元在手冊第幾章第幾頁 | 99 檔 |
 
@@ -610,7 +610,7 @@ MemAvailable:  14863188 kB
 
 ## 延伸查閱
 
-官方文件（相對路徑 `../../reference-docs/`，此為自本檔所在資料夾起算；「未讀取」者用途依編號慣例推測，精確引用前先自行開檔確認——完整指路與每份「什麼問題查它」見 [99-官方文件查閱指路](99-official-documentation-guide.md)）：
+官方文件（相對路徑 `../../reference-docs/`，此為自本檔所在資料夾起算；「未讀取」者用途依編號慣例推測，精確引用前先自行開檔確認——完整指路與每份「什麼問題查它」見 [99-官方文件查閱指路](09-official-documentation-guide.md)）：
 
 - `../../reference-docs/r01ds0429ej0130-rzv2h.pdf` — datasheet。查規格總表看 **Section 1**（Table 1.3-1～1.3-16 各子表、Table 1.4-1/1.4-2 List of Units 縮寫對照）。注意：本資料夾這份雖以 `.pdf` 為副檔名，內容實為**純文字轉檔**（詳見 99 檔）——方塊圖在文字轉檔裡順序錯亂，要看圖得另取 Renesas 原版 PDF。
 - `../../reference-docs/r01uh1032ej0130-rzv2h.pdf` — 硬體手冊（暫存器級，約 4800 頁）。**先用 `../../reference-docs/_toc_full.txt` 查章頁再跳**；常用章：4.2 PFC、4.4 CPG、4.6 中斷、4.7 DMAC、5.7 GPT、6.2 SDHI、6.3 GBETH、6.6 PCIe、7.7 RIIC、7.9 CANFD、7.10 ADC、9.2 CRU、9.6 VCD、9.7 GE3D（完整對照見 99 檔的表）。

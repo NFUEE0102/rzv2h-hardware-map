@@ -1,6 +1,5 @@
-# 99 · Official Documentation Guide (4.4)
-
-> This file is the official-documentation guide for the "04 · Whole-Board Hardware Resource Map" folder (corresponding to chapter number **4.4**). The chapter's opening explanation and the 4.1 overview are in [00-overview-and-ip-enablement-map.md](00-overview-and-ip-enablement-map.md), the compute units are in [01-compute-units.md](01-compute-units.md), and the individual peripheral units are in the g2–g8 group files — the official Manual's chapter numbers and page numbers cited in those files can all be looked up yourself using the method this file teaches.
+# 09 · Official Documentation Guide
+> This file is the official-documentation guide for the "04 · Whole-Board Hardware Resource Map" folder (corresponding to chapter number **4.4**). The chapter's opening explanation and the 4.1 overview are in [00-overview-and-ip-enablement-map.md](00-overview-and-ip-enablement-map.md), the compute units are in [01-compute-units.md](01-compute-units.md), and the individual peripheral units are in the 02–08 group files — the official Manual's chapter numbers and page numbers cited in those files can all be looked up yourself using the method this file teaches.
 
 In the earlier files you've already used a huge pile of hardware facts — the register base address of some unit, which clock some bus runs on, where DRP-AI3's 512 MB reserved region starts. Not one of these numbers was made up out of thin air; every one of them can be traced back to its original source in the official-documentation folder that ships alongside the handbook repo. The purpose of this file is to turn "that stack of documents" into **a map you can look things up in yourself**: when a question comes up, you should be able to immediately tell which document to flip to and which chapter to flip to, instead of scrolling through a 43 MB manual from front to back.
 
@@ -225,7 +224,7 @@ Run the grep trick above once for every unit and organize the results into the r
 | I3C bus | 7.8 I3C Bus Interface (I3C) (p3061) | I3C0 `0x12400000` |
 | CAN-FD (6 ch) | 7.9 CAN-FD Interface (CANFD) (p3363) | CANFD base `0x12440000`, a single base covers 6 channels |
 | 12-bit ADC | 7.10 12-Bit A/D Converter (ADC) (p3670) | ADC `0x11C00000` |
-| Temperature sensor (TSU) | 7.11 Temperature Sensor Unit (TSU) (p3739) | TSU0 `0x11000000`, TSU1 `0x14002000` (both base addresses verified against the hardware manual's §1.8 address map, `<TSU0_base>`/`<TSU1_base>`; trim values come from OTP [one-time-programmable memory on the chip], 0.0625 °C/code — the trim values are a secondhand transcription, see the list of items pending verification in g7) |
+| Temperature sensor (TSU) | 7.11 Temperature Sensor Unit (TSU) (p3739) | TSU0 `0x11000000`, TSU1 `0x14002000` (both base addresses verified against the hardware manual's §1.8 address map, `<TSU0_base>`/`<TSU1_base>`; trim values come from OTP [one-time-programmable memory on the chip], 0.0625 °C/code — the trim values are a secondhand transcription, see the list of items pending verification in 07) |
 
 > 💡 **Tip**: If you're writing a driver for CAN-FD register by register, besides Manual Chapter 7.9, Renesas also has a separate FSP-edition CAN-FD manual, `r01us0478`, with more complete register documentation (not in this folder — you'll need to get it from Renesas separately). When hooking up a DroneCAN/UAVCAN controller (a flight controller, for example), the usual approach is to check 7.9 first to get the addresses, then flip to `r01us0478` to work through the registers one by one (Source: d06, `07-hardware-unit-usage-guide.md`).
 
@@ -246,7 +245,7 @@ Run the grep trick above once for every unit and organize the results into the r
 > **Cause**: That "1.8" refers to `1.8 Address Map` (where VCD's `0x16400000` address region is listed) — it's an **address-region number, not a chapter number**; and a numbering like "15.x" doesn't match the Manual's actual final table of contents — VCD actually lands in 9.6 in the Manual.
 > **Prevention**: Always go back to `_toc_full.txt`, the authoritative table of contents, to look up chapter numbers — what it greps out, `4683	  9.6 H.265/H.264 Multi Codec (VCD)`, is the real location; the address region can additionally be cross-checked in `1.8 Address Map` (p167).
 
-> 📌 **Address correction note**: An earlier secondhand source recorded VCD's address as `0x14800000`, but §1.8 Address Map shows that `0x14800000` is the SRAM2(REG) region; VCD's three sub-blocks (VLC/FCPC/CE) are actually `0x16400000`/`0x16410000`/`0x16420000`, consistent with the DT node `vcp4@16400000` in the g2 chapter. The source document's transcription was wrong here; it has been corrected against §1.8 of the official Manual.
+> 📌 **Address correction note**: An earlier secondhand source recorded VCD's address as `0x14800000`, but §1.8 Address Map shows that `0x14800000` is the SRAM2(REG) region; VCD's three sub-blocks (VLC/FCPC/CE) are actually `0x16400000`/`0x16410000`/`0x16420000`, consistent with the DT node `vcp4@16400000` in the 02 chapter. The source document's transcription was wrong here; it has been corrected against §1.8 of the official Manual.
 
 ## Only Need Spec Numbers: The Datasheet's Section 1 Is Enough
 

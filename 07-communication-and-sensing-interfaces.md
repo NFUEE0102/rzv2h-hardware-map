@@ -1,4 +1,4 @@
-# g7 · Communication & Sensing Interfaces (Serial / Bus / Network / Expansion / Analog)
+# 07 · Communication & Sensing Interfaces (Serial / Bus / Network / Expansion / Analog)
 
 This is the **group deep-dive reference file** for Chapter 4, "Full-Board Hardware Resource Map." Chapter 4's overview (file 00, section 4.1) uses a grouped summary table to flatten the whole SoC's functional blocks out so you can see at a glance "what this is, what state it's in on the board, where to go for the deep dive." This file is the **full expansion** of every unit in two of those groups — "communication interfaces" and "sensing / analog." The summary table answers "is it there, is it turned on"; this file answers "how does it actually work, where does Linux expose it, where are the limits of its capability, and when would you actually use it."
 

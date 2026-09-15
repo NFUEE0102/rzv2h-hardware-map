@@ -1,5 +1,4 @@
-# 01 · 運算單元（4.2 運算單元深入）
-
+# 01 · 運算單元
 > 本檔是「04 · 全板硬體資源地圖」資料夾的運算單元深入檔（對應章節號 **4.2**）。章首說明、學習目標、`<板子IP>` 佔位與標記慣例、以及 4.1 全板總覽都在 [00-總覽與IP啟用地圖](00-overview-and-ip-enablement-map.md)；內文出現「4.1」指 00 檔、「4.4」指 99 檔。標 ✅ 的板上複驗步驟均附 transcript 檔名，指向 handbook 資料夾下 `live/` 的板上實錄（自本資料夾起算為 `../live/ch04*.txt`）。
 
 ## 資料夾檔案清單
@@ -8,8 +7,8 @@
 |---|---|
 | [00-總覽與IP啟用地圖](00-overview-and-ip-enablement-map.md) | 章首＋4.1 全板總覽與啟用地圖＋章末回顧／速查表／實測數據表 |
 | **01-運算單元.md**（本檔） | A55／R8／M33／GPU／DRP-AI3 深入：規格、benchmark 實測、能力上限推導；DRP1 的定位見 00 檔分群總表、深講見第 3 章 |
-| [g2-影像擷取・編解碼與顯示](g2-video-capture-codec-display.md)～[g8-除錯與安全](g8-debug-and-security.md) | 周邊與介面逐單元深講：影像（g2）、音訊（g3）、記憶體與儲存（g4）、系統骨幹（g5）、計時（g6）、通訊與感測（g7）、除錯與安全（g8） |
-| [99-官方文件查閱指路](99-official-documentation-guide.md) | 官方文件哪份答什麼問題、`_toc_full.txt` 秒查法 |
+| [02-影像擷取・編解碼與顯示](02-video-capture-codec-display.md)～[08-除錯與安全](08-debug-and-security.md) | 周邊與介面逐單元深講：影像（02）、音訊（03）、記憶體與儲存（04）、系統骨幹（05）、計時（06）、通訊與感測（07）、除錯與安全（08） |
+| [99-官方文件查閱指路](09-official-documentation-guide.md) | 官方文件哪份答什麼問題、`_toc_full.txt` 秒查法 |
 
 ---
 
@@ -464,7 +463,7 @@ CoreMark 1.0 : 6852.301750 / GCC13.3.0 ... / Heap
 | RSA-2048 sign/verify | 156 / 5809 ops/s | — | 05-compute-benchmark.md:75 |
 | ECDSA P-256 sign/verify | 6284 / 2333 ops/s | — | 05-compute-benchmark.md:76 |
 
-> ⚠️ **注意**（工程背景，非除錯事件）：**情境**——你需要加密資料傳輸或儲存。**症狀**——A55 缺 ARMv8 Crypto Extensions，AES/SHA 只能走軟體，吞吐被壓在數十 MB/s。**原因**——CPU flags 裡沒有 `aes`/`sha2`。**預防／處理**——4 Mbps 視訊串流的加密（約需 0.5 MB/s）綽綽有餘；但若有大量加密儲存/傳輸需求，要留意頻寬上限（單核 AES 約 35–56 MB/s、4 核約 137 MB/s）（出處 05-compute-benchmark.md:79-80）。做安全設計時另記一條：這顆 H44 在 Linux 上摸不到硬體 Security IP、也沒有 `/dev/tee`（TEE＝可信執行環境，如 OP-TEE）（本料號 Security＝N/A、未搭載——真硬體手冊 Table 1.1-1〔p78〕核實，見 g8），所以**不要假設能做大流量加密或硬體金鑰隔離**；這吞吐足夠做資料簽章（出處 09-compute-capability.md:44）。
+> ⚠️ **注意**（工程背景，非除錯事件）：**情境**——你需要加密資料傳輸或儲存。**症狀**——A55 缺 ARMv8 Crypto Extensions，AES/SHA 只能走軟體，吞吐被壓在數十 MB/s。**原因**——CPU flags 裡沒有 `aes`/`sha2`。**預防／處理**——4 Mbps 視訊串流的加密（約需 0.5 MB/s）綽綽有餘；但若有大量加密儲存/傳輸需求，要留意頻寬上限（單核 AES 約 35–56 MB/s、4 核約 137 MB/s）（出處 05-compute-benchmark.md:79-80）。做安全設計時另記一條：這顆 H44 在 Linux 上摸不到硬體 Security IP、也沒有 `/dev/tee`（TEE＝可信執行環境，如 OP-TEE）（本料號 Security＝N/A、未搭載——真硬體手冊 Table 1.1-1〔p78〕核實，見 08），所以**不要假設能做大流量加密或硬體金鑰隔離**；這吞吐足夠做資料簽章（出處 09-compute-capability.md:44）。
 
 #### DRP-AI3 NPU 推論：把 145 ms 壓到 15 ms
 

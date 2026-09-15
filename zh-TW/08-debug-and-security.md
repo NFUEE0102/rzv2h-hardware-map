@@ -1,4 +1,4 @@
-# g8 · 除錯與安全
+# 08 · 除錯與安全
 
 這一群裝的是整片 RZ/V2H 上「你平常摸不到、但關鍵時刻救命」的三套硬體：**晶片內建的除錯／追蹤子系統（CoreSight）**、**執行環境隔離與記憶體存取管控（TrustZone ＋ 9 顆 TZC-400）**、以及**安全模組（Trusted Secure IP 加密引擎 ＋ OTP／Device-ID／JTAG-disable）**。
 
@@ -6,7 +6,7 @@
 
 （另外先劃清一條界線：**日常除錯的第一工具不在這一群**——是 CN8 的 UART 序列主控台（FT234XD → SCIF0，115200 8N1），開機 log、kernel 當機現場、救援登入都靠它，完整教學見第 01 章 1.4 節。這一群的 CoreSight／JTAG 是更深一層、需要外部探針的晶片級除錯，多數讀者用不到。）
 
-> **本群組的板上硬體是這顆料號**：R9A09G057H44GBG（板卡手冊 Page 11(板卡手冊) 元件表 U1，H44＝RZ/V2HP 版）。先記住這顆料號的一個關鍵取捨——**板上量到 Linux 沒有任何硬體加密介面**（無 `/dev/tee`、無 Renesas TRNG 的 hwrng 節點、CA55 指令集也無 ARMv8 Crypto Extension）。至於這顆料號到底有沒有搭載 Trusted Secure IP 硬體，**真硬體手冊 `r01uh1032` §1.1.2 Product Lineup Table 1.1-1〔p78〕已給答案**：這張 SKU 陣容表——正是 00／g2 檔用來坐實本料號 ISP＝Available〔Mali-C55〕的同一張真 PDF 表——把 R9A09G057H44GBG 的 Security 欄逐字標為 **N/A**，可 pypdf 逐字核實，屬一手來源，故本料號**未搭載**。（另一份 datasheet `r01ds0429` 的同類陣容表雖為劣化轉檔，但真硬體手冊既已提供乾淨 SKU 依據，就不再是障礙。）這件取捨貫穿整個〈單元三〉，也是本群組最常被誤解的一點。
+> **本群組的板上硬體是這顆料號**：R9A09G057H44GBG（板卡手冊 Page 11(板卡手冊) 元件表 U1，H44＝RZ/V2HP 版）。先記住這顆料號的一個關鍵取捨——**板上量到 Linux 沒有任何硬體加密介面**（無 `/dev/tee`、無 Renesas TRNG 的 hwrng 節點、CA55 指令集也無 ARMv8 Crypto Extension）。至於這顆料號到底有沒有搭載 Trusted Secure IP 硬體，**真硬體手冊 `r01uh1032` §1.1.2 Product Lineup Table 1.1-1〔p78〕已給答案**：這張 SKU 陣容表——正是 00／02 檔用來坐實本料號 ISP＝Available〔Mali-C55〕的同一張真 PDF 表——把 R9A09G057H44GBG 的 Security 欄逐字標為 **N/A**，可 pypdf 逐字核實，屬一手來源，故本料號**未搭載**。（另一份 datasheet `r01ds0429` 的同類陣容表雖為劣化轉檔，但真硬體手冊既已提供乾淨 SKU 依據，就不再是障礙。）這件取捨貫穿整個〈單元三〉，也是本群組最常被誤解的一點。
 
 ## 本群組單元清單
 
@@ -143,7 +143,7 @@ dmesg | grep -iE 'optee|tee_'
 cat /proc/mtd
 ```
 
-會看到 `mtd0='bl2'`、`mtd1='fip'`——這兩個分割區存放的正是 TF-A／secure boot 相關映像檔（`bl2` 是第二階段開機載入器、`fip` 是 Firmware Image Package，內含 BL31 等）（doc07 §16；本手冊 4.1（00 檔）與 g4 記憶體與儲存群已逐字驗證這四個 MTD 分割區：`mtd0` bl2／`mtd1` fip／`mtd2` env／`mtd3` test-area，`mtd0`／`mtd1` 是開機韌體，只讀不寫）。
+會看到 `mtd0='bl2'`、`mtd1='fip'`——這兩個分割區存放的正是 TF-A／secure boot 相關映像檔（`bl2` 是第二階段開機載入器、`fip` 是 Firmware Image Package，內含 BL31 等）（doc07 §16；本手冊 4.1（00 檔）與 04 記憶體與儲存群已逐字驗證這四個 MTD 分割區：`mtd0` bl2／`mtd1` fip／`mtd2` env／`mtd3` test-area，`mtd0`／`mtd1` 是開機韌體，只讀不寫）。
 
 TZC 的暫存器位址（供未來若需 bare-metal 存取參考）：filter 透過 APB 以 `REGION_SETUP_LOW/HIGH_<n>`、`REGION_ATTRIBUTES_<n>`、`REGION_ID_ACCESS_<n>` 設定；部分實例位址如 `TZC400_XSPI` `0x10470000`、`TZC400_SRAMM` `0x10460000`——**這段轉錄自 doc07 §16 標明的手冊行號（15770 行），落在本手冊取材的 p352–356 概說範圍之外的暫存器明細頁，本群組筆記未直接查證，僅轉引**（本手冊 4.4 文件查閱表亦列出這兩個位址）。
 
@@ -153,7 +153,7 @@ TZC 的暫存器位址（供未來若需 bare-metal 存取參考）：filter 透
 - **每個 TZC 最多 8 個可程式化安全區域 ＋ 1 個 default region**（手冊 3.5.1.1）。
 - **支援最多 256 個 outstanding transaction on normal path**（手冊 3.5.1.1）。
 - **TZC-400 是 Arm 授權標準 IP**，region 設定暫存器位址等暫存器層級細節要查 Arm 官方 Technical Reference Manual，本 SoC 手冊只描述整合方式（手冊 3.5.1 Overview：「for details on the functions of TZC-400, see the relevant Technical Reference Manual」）。**這份 Arm 文件不在本手冊可用來源清單內，未查證。**
-- **與記憶體控制器的關係**：本手冊 g4 記憶體與儲存群提到 LPDDR4/4X 控制器帶「in-line ECC、TZC-400」——這裡的 TZC-400 就是上表 `TZC400_DDR00/01/10/11` 這四顆守 DDR 的實例。TrustZone 對 DDR 的存取管控，正是靠這幾顆 filter unit 實作的。
+- **與記憶體控制器的關係**：本手冊 04 記憶體與儲存群提到 LPDDR4/4X 控制器帶「in-line ECC、TZC-400」——這裡的 TZC-400 就是上表 `TZC400_DDR00/01/10/11` 這四顆守 DDR 的實例。TrustZone 對 DDR 的存取管控，正是靠這幾顆 filter unit 實作的。
 - **與 CM33 的 TrustZone-M 是兩件事**：本手冊 4.2 提到 CM33 帶「TrustZone-M 安全延伸」（Armv8-M 架構的安全延伸）——那是 CM33 這顆微控制器核心自己的執行模式隔離，與本單元講的「CA55 的 TrustZone ＋ TZC-400 匯流排管控」是不同層級的東西，名字相近但別混為一談。
 
 ### 什麼情況下你會用到它
@@ -206,11 +206,11 @@ head -c 32 /dev/urandom | xxd       # 讀到的熵源來自核心 PRNG，不是 
 
 換句話說，本群組（除錯 ＋ 安全）三個單元在 Linux 使用者層**都沒有暴露對應介面**——CoreSight「no sysfs nodes」、TrustZone「no /dev/tee」、Security IP「OTP 無 userspace 曝露」——它們只能透過開機韌體或外部工具間接觸及（doc07 §49 一併引用了前兩者作佐證）。
 
-> 💡 **OTP 內容在本板唯一「間接被用到」的地方**：本手冊 4.4 文件查閱表提到，溫度感測器（TSU，見 g7 通訊與感測介面群）的校正 **trim 值來自 OTP**（0.0625 °C/code）。也就是說，OTP 雖然對 Linux 使用者空間完全不曝露，但它出廠燒錄的每顆晶片校正值，是被**核心的 thermal 驅動程式**在背後讀去換算溫度的。這是本板上 OTP 內容確實有在發揮作用的一個實例——只是它發生在核心驅動程式內部，不是你能用一行 Linux 指令讀出來的。
+> 💡 **OTP 內容在本板唯一「間接被用到」的地方**：本手冊 4.4 文件查閱表提到，溫度感測器（TSU，見 07 通訊與感測介面群）的校正 **trim 值來自 OTP**（0.0625 °C/code）。也就是說，OTP 雖然對 Linux 使用者空間完全不曝露，但它出廠燒錄的每顆晶片校正值，是被**核心的 thermal 驅動程式**在背後讀去換算溫度的。這是本板上 OTP 內容確實有在發揮作用的一個實例——只是它發生在核心驅動程式內部，不是你能用一行 Linux 指令讀出來的。
 
 ### 關鍵能力與限制
 
-- **這是選配（option）模組；本板實際料號 R9A09G057H44GBG（板卡手冊 Page 11(板卡手冊) 元件表 U1）的 Security 欄標為 N/A——這條已由真硬體手冊坐實。** 真硬體手冊 `r01uh1032` §1.1.2 Product Lineup Table 1.1-1〔p78〕把 R9A09G057H44GBG 的 Security 欄逐字標為 **N/A**（此表可 pypdf 開啟、逐字核實，正是 00／g2 檔用來坐實本料號 ISP＝Available〔Mali-C55〕的同一張表；同頁 CA55 表另註『Cryptographic extension supported (for security-supported products only)』，與本板 CPU flags 無 `aes`／`sha` 一致）——屬一手來源，故本料號**未搭載**此 IP。另一份 datasheet `r01ds0429` 的同類陣容表雖為劣化轉檔（`file` 判為 `data`、無法 pypdf 開啟、`_extracted` grep 不到陣容表，G2），但真硬體手冊既已提供乾淨 SKU 表，此判定不再倚賴它。**板上這一側**也一致：Linux 沒有任何硬體加密介面（無 `/dev/tee`、無 Renesas TRNG hwrng、CA55 無 crypto 延伸）——這是板上實證。（提醒：「Linux 摸不到」本身不足以證明矽晶沒有某顆 IP——ISP 就是矽晶含、device tree 未啟用的反例；但 Security 這一格不必靠板上反推，SKU 表已直接標 N/A。）
+- **這是選配（option）模組；本板實際料號 R9A09G057H44GBG（板卡手冊 Page 11(板卡手冊) 元件表 U1）的 Security 欄標為 N/A——這條已由真硬體手冊坐實。** 真硬體手冊 `r01uh1032` §1.1.2 Product Lineup Table 1.1-1〔p78〕把 R9A09G057H44GBG 的 Security 欄逐字標為 **N/A**（此表可 pypdf 開啟、逐字核實，正是 00／02 檔用來坐實本料號 ISP＝Available〔Mali-C55〕的同一張表；同頁 CA55 表另註『Cryptographic extension supported (for security-supported products only)』，與本板 CPU flags 無 `aes`／`sha` 一致）——屬一手來源，故本料號**未搭載**此 IP。另一份 datasheet `r01ds0429` 的同類陣容表雖為劣化轉檔（`file` 判為 `data`、無法 pypdf 開啟、`_extracted` grep 不到陣容表，G2），但真硬體手冊既已提供乾淨 SKU 表，此判定不再倚賴它。**板上這一側**也一致：Linux 沒有任何硬體加密介面（無 `/dev/tee`、無 Renesas TRNG hwrng、CA55 無 crypto 延伸）——這是板上實證。（提醒：「Linux 摸不到」本身不足以證明矽晶沒有某顆 IP——ISP 就是矽晶含、device tree 未啟用的反例；但 Security 這一格不必靠板上反推，SKU 表已直接標 N/A。）
 
 - **若有搭載，加密引擎規格（純屬手冊規格描述，非本板實測，逐字取自手冊 4.8.1 Table 4.8-1）**：
   - **AES**：符合 NIST FIPS PUB 197，金鑰長度 128／192／256 bits，區塊大小 128 bits；支援模式 ECB／CBC／CTR（NIST SP 800-38A）、CMAC（SP 800-38B）、CCM（SP 800-38C）、GCM（SP 800-38D）、XTS（SP 800-38E）、GCTR；AES-GCM 由 AES-GCTR ＋ GHASH 組合實現。
@@ -246,7 +246,7 @@ head -c 32 /dev/urandom | xxd       # 讀到的熵源來自核心 PRNG，不是 
 
 前面三個單元講的是「除錯」與「加密安全」。這一節補上「**熱**安全」——怎麼在 Linux 上讀晶片溫度、看清楚它的自動保護門檻（trip point）在哪、以及在高負載下溫度與門檻之間還剩多少餘裕。這件事不需要任何外部工具，一條 `cat` 就能讀，但要看懂讀到的數字代表什麼、哪個數字才是「快要出事」的紅線，得先把機制接起來。
 
-> **感測器本身的機制在 g7**：晶片溫度由 TSU（Temperature Sensor Unit，晶片內建溫度感測單元，2 組 TSU0／TSU1）量測，走 Linux thermal 框架、驅動程式 `rzv2h_thermal`、曝露為兩個 thermal zone——這部分的硬體機制（類比感測器＋專屬 ADC、量的是 die 溫度而非環境溫度）在 g7〈通訊與感測介面群〉的 TSU 小節已完整講過（官方出處 `r01uh1032` §7.11，p3739）。本節只聚焦「怎麼把它當熱安全監看工具用」。
+> **感測器本身的機制在 07**：晶片溫度由 TSU（Temperature Sensor Unit，晶片內建溫度感測單元，2 組 TSU0／TSU1）量測，走 Linux thermal 框架、驅動程式 `rzv2h_thermal`、曝露為兩個 thermal zone——這部分的硬體機制（類比感測器＋專屬 ADC、量的是 die 溫度而非環境溫度）在 07〈通訊與感測介面群〉的 TSU 小節已完整講過（官方出處 `r01uh1032` §7.11，p3739）。本節只聚焦「怎麼把它當熱安全監看工具用」。
 
 ### 步驟一：讀兩個 thermal zone 的當下溫度
 
@@ -278,7 +278,7 @@ for z in /sys/class/thermal/thermal_zone*; do for t in $z/trip_point_*_type; do 
 /sys/class/thermal/thermal_zone1 trip_point_0: critical 120000 hyst=1000
 ```
 
-判讀：每個 zone 只有**一個** trip point，型別 `critical`、溫度 `120000` 毫度 = **120°C**、遲滯（hyst）1°C。`critical` 是最高級別——溫度撞到它，核心會直接觸發緊急關機保護晶片。**要記住的重點：這裡沒有註冊任何 `passive`（被動降頻）或 active（主動散熱）trip，只有一條 120°C 的緊急關機線。** 換句話說，120°C 以下沒有任何「自動幫你降頻」的門檻在管你——溫度管理若要更細緻，得你自己讀值做策略（見下方陷阱框與 g7 的節流做法）。
+判讀：每個 zone 只有**一個** trip point，型別 `critical`、溫度 `120000` 毫度 = **120°C**、遲滯（hyst）1°C。`critical` 是最高級別——溫度撞到它，核心會直接觸發緊急關機保護晶片。**要記住的重點：這裡沒有註冊任何 `passive`（被動降頻）或 active（主動散熱）trip，只有一條 120°C 的緊急關機線。** 換句話說，120°C 以下沒有任何「自動幫你降頻」的門檻在管你——溫度管理若要更細緻，得你自己讀值做策略（見下方陷阱框與 07 的節流做法）。
 
 再確認一次「沒有綁任何散熱裝置」：
 
@@ -335,9 +335,9 @@ t=300s temps=37000 38000 freq=1700000
 > - **情境**：你想用 `thermal_zone*/temp` 當作機箱或環境溫度、或假設溫度過高時系統會自動降頻保護。
 > - **症狀**：以為溫度偏高就是環境熱；或在長時間重載（以 NPU＋GPU＋CPU 同時滿載為例）下溫度悄悄爬升卻沒看到任何自動降頻。
 > - **原因**：TSU 量的是晶片內部 die 溫度，與環境溫度可能有明顯落差（有主動散熱或氣流時差更大）；而本板 thermal 框架下只有一條 120°C 的 critical trip、沒有 passive 降頻 trip、也沒有 cooling device——120°C 以下沒有任何自動節流在保護你。
-> - **預防／處理**：要量環境溫度得另接外部感測器（見 g7）。要在撞到 120°C 緊急關機之前就控制溫度，得**自己**讀 `thermal_zone*/temp` 搭配自訂節流策略（以溫度過某個自訂上限就降低送進 NPU／GPU 的工作量為例）。這一段要納入你的系統設計，不能指望開機就有。
+> - **預防／處理**：要量環境溫度得另接外部感測器（見 07）。要在撞到 120°C 緊急關機之前就控制溫度，得**自己**讀 `thermal_zone*/temp` 搭配自訂節流策略（以溫度過某個自訂上限就降低送進 NPU／GPU 的工作量為例）。這一段要納入你的系統設計，不能指望開機就有。
 
-> **尾註（出處）**：TSU 感測器機制與精度規格見 g7〈通訊與感測介面群〉TSU 小節（官方硬體手冊 `r01uh1032` §7.11 Temperature Sensor Unit，p3739）；校正 trim 值 0.0625 °C/code 由核心 thermal 驅動程式從 OTP 讀取換算（見本群組〈單元三〉的 OTP 說明）。板上讀值／trip／cooling device 為板上實測 live/ch4-w1-tsu.txt（2026-07-22）；溫度與 stress 負載關係為板上實測 live/win-03-stress.txt（2026-07-18）。
+> **尾註（出處）**：TSU 感測器機制與精度規格見 07〈通訊與感測介面群〉TSU 小節（官方硬體手冊 `r01uh1032` §7.11 Temperature Sensor Unit，p3739）；校正 trim 值 0.0625 °C/code 由核心 thermal 驅動程式從 OTP 讀取換算（見本群組〈單元三〉的 OTP 說明）。板上讀值／trip／cooling device 為板上實測 live/ch4-w1-tsu.txt（2026-07-22）；溫度與 stress 負載關係為板上實測 live/win-03-stress.txt（2026-07-18）。
 
 ---
 

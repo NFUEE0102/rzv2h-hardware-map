@@ -1,4 +1,4 @@
-# g4 · Memory and Storage
+# 04 · Memory and Storage
 
 This group covers, in one pass, the five hardware units on the RZ/V2H that answer the question of "where does the data actually sit": the **internal SRAM** — the fastest thing on the chip, yet reserved in its entirety; the **Boot ROM**, the first thing the SoC runs after power-on; the **LPDDR4/4X controller**, which shoulders the system's main memory; the **xSPI/NOR flash**, which carries the small boot image; and the **SDHI/SD card**, which holds the OS and bulk data. Together they form one complete memory-and-storage path, running all the way from "on-chip, volatile, a landing spot for code" to "off-chip, non-volatile, for the filesystem."
 

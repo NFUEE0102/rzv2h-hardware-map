@@ -1,4 +1,4 @@
-# g6 · Timing System (Timers/PWM)
+# 06 · Timing System (Timers/PWM)
 
 Inside the RZ/V2H SoC (system-on-chip, cramming the processor, memory controller, and every kind of peripheral into a single chip), there's more than one kind of "time-counting" hardware. The official hardware manual groups them all together under SECTION 5 TIMER, and this group maps to that entire section: the system time base, the watchdog, the general timer, the compare match timer, the general-purpose timer (also the only one that can output PWM waveforms), PWM output gating, and the realtime clock.
 
@@ -115,7 +115,7 @@ One last essential characteristic: it has **no external I/O pins at all** — it
 ### How You See This Under Linux
 
 - **Driver**: `renesas_ostm` (kernel source `drivers/clocksource/renesas-ostm.c`). It's bound as the kernel's **clockevent/clocksource** provider — clocksource is the timing source the kernel uses to read "the current time," and clockevent is the timer the kernel uses to schedule "trigger an event at a certain point in time" (e.g., the scheduler's next tick). It is **not** a `/dev` character device, and has **no** ioctl interface (ioctl being the system call userspace uses to issue control commands to a device node). (doc07 §19, verbatim: "bound as a clockevent/clocksource — NOT a /dev character device. It has no userspace ioctl interface")
-- **Board status**: at least one channel is claimed by the kernel as the system's clockevent device (driving the kernel's scheduler tick); the remaining channels are managed by the kernel/firmware and not exposed to the application layer. (unit-map g6: "Enabled and actively used by the kernel (`renesas_ostm` clockevent)")
+- **Board status**: at least one channel is claimed by the kernel as the system's clockevent device (driving the kernel's scheduler tick); the remaining channels are managed by the kernel/firmware and not exposed to the application layer. (unit-map 06: "Enabled and actively used by the kernel (`renesas_ostm` clockevent)")
 - **How to observe it**:
 
 ```bash
@@ -178,7 +178,7 @@ The counting prescaler is selectable from 4 options (a prescaler divides the inp
 ### How You See This Under Linux
 
 - **Driver**: `rz_cmtw` (the Renesas RZ CMTW clock-event/clocksource driver), bound as a kernel timer, **not** a `/dev` node, no ioctl interface. (doc07 §20, verbatim: "bound as a kernel timer, NOT a /dev node")
-- **Board status**: the kernel has this driver loaded as an auxiliary clock source, but it is **not exposed as an application-layer device**. (unit-map g6: "Enabled (`rz_cmtw` clockevent, not exposed as an application-layer device)")
+- **Board status**: the kernel has this driver loaded as an auxiliary clock source, but it is **not exposed as an application-layer device**. (unit-map 06: "Enabled (`rz_cmtw` clockevent, not exposed as an application-layer device)")
 - **How to observe it**:
 
 ```bash
@@ -239,7 +239,7 @@ What lets GPT produce "high-quality" power-control waveforms comes down to a few
 
 This is the one unit in this group that most needs to be stated plainly: **GPT has no usable operating path from this board's Linux userspace.**
 
-- **Board status (development notes)**: of the 16 `gpt@…` device tree nodes, only `gpt@13010000` (GPT0, covering ch0–7) is `okay`; the other 15 nodes are all `disabled` — and **no PWM chip is registered**. (unit-map g6; doc07 §18, verbatim: "No PWM chip is registered for it"; ✅ Verified on the board — all 16 nodes confirmed, only `gpt@13010000` is `okay`; transcript: live/ch04b-dt-status.txt)
+- **Board status (development notes)**: of the 16 `gpt@…` device tree nodes, only `gpt@13010000` (GPT0, covering ch0–7) is `okay`; the other 15 nodes are all `disabled` — and **no PWM chip is registered**. (unit-map 06; doc07 §18, verbatim: "No PWM chip is registered for it"; ✅ Verified on the board — all 16 nodes confirmed, only `gpt@13010000` is `okay`; transcript: live/ch04b-dt-status.txt)
 - **No standard Linux PWM path**: the `/sys/class/pwm` directory exists but is empty — there's no `pwm-rzv2h`/`pwm-rzg2l` driver bound to `gpt@13010000`. Even though the DT node has its clock/reset probed, nothing is exposed to the application layer as a `/dev` node or sysfs control (doc07 §18, verbatim: "Effectively 'no Linux driver' for application use; counting/PWM must be driven bare-metal via MMIO"; ✅ Verified on the board: `/sys/class/pwm` is empty; transcript: live/ch04-reserved-mem.txt).
 - **How to confirm this**:
 
@@ -284,7 +284,7 @@ ls -A /sys/class/pwm | wc -l    # should print 0
 | Clock source | `clks_gpt` and its `/2 /4 /8 /16 /32 /64 /256 /1024` dividers, or external trigger `GTETRGA`–`GTETRGH` | r01uh1032 §5.7.1.1 Table 5.7-2(1/2) |
 | Notable mechanisms | Double buffering, asymmetric PWM, dead-time generation, ADC conversion trigger, 13 interrupt sources | r01uh1032 §5.7.1.1 |
 | Register bases | `<GPT0_base>` = `0x1301_0000` (ch0–7), `<GPT1_base>` = `0x1302_0000` (ch8–15) | r01uh1032 §5.7.2 Table 5.7-4 |
-| Range usable on this board | Only `gpt@13010000` (GPT0 ch0–7) has DT `okay`; the other 15 nodes are `disabled`; **no PWM chip registered** | unit-map g6; doc07 §18; ✅ Verified on the board (transcript: live/ch04b-dt-status.txt) |
+| Range usable on this board | Only `gpt@13010000` (GPT0 ch0–7) has DT `okay`; the other 15 nodes are `disabled`; **no PWM chip registered** | unit-map 06; doc07 §18; ✅ Verified on the board (transcript: live/ch04b-dt-status.txt) |
 
 > ⚠️ **Note (separate the "theoretical silicon ceiling" from "what's actually usable on this board's Linux")**: the Manual is describing silicon-level capability (16 channels, 4 pins per channel); this board's device tree currently only has an `okay` node for GPT0 ch0–7, those 8 channels, and no PWM chip. When citing GPT's capability, be sure to keep these two layers separate — don't let the reader come away thinking 16 channels/64 outputs are all directly usable under this board's Linux.
 
@@ -307,7 +307,7 @@ ls -A /sys/class/pwm | wc -l    # should print 0
 
 ### What This Is (the Mechanism)
 
-Let's clear up the easiest concept to misunderstand first: **PWM is not a standalone peripheral on RZ/V2H.** The development notes explicitly state "PWM-output — NOT a standalone peripheral on RZ/V2H." The logic that generates the PWM waveform lives entirely in GPT (§5.7), while POEG (§5.8) is only responsible for the layer that decides "should the output pin be allowed through or not." Together, the two form one complete PWM output chain. (doc07 §24; unit-map g6)
+Let's clear up the easiest concept to misunderstand first: **PWM is not a standalone peripheral on RZ/V2H.** The development notes explicitly state "PWM-output — NOT a standalone peripheral on RZ/V2H." The logic that generates the PWM waveform lives entirely in GPT (§5.7), while POEG (§5.8) is only responsible for the layer that decides "should the output pin be allowed through or not." Together, the two form one complete PWM output chain. (doc07 §24; unit-map 06)
 
 POEG (Port Output Enable for GPT) is not itself a timer and doesn't count — it's a **protective gate** on GPT's output pins: it can switch a GPT output pin to a disabled state. The reason it exists is "fail-safe": if a software bug ever drives the power stage into a dangerous state via PWM, POEG can cut the output at the hardware level immediately, without waiting for the CPU to react. (r01uh1032 §5.8.1)
 
@@ -340,7 +340,7 @@ Same as GPT — this board's Linux side has no path to it:
 | Register per group | One 32-bit control register `POEG_POEGGn`, offset `0x0000` | r01uh1032 §5.8.2.1 |
 | Register bases | POEG0A = `0x1300_1C00`, 0B = `0x1300_2000`, 0C = `0x1300_2400`, 0D = `0x1300_2800`, POEG1A(E) = `0x1300_2C00`, 1B(F) = `0x1300_3000`, 1C(G) = `0x1300_3400`, 1D(H) = `0x1300_3800` | r01uh1032 §5.8.2 Table 5.8-3 |
 | Theoretical maximum outputs | Up to 64 PWM-capable outputs (4 pins × 16 channels, worked out from the official spec, **not measured on this board**) | doc07 §24 |
-| Board status | `/sys/class/pwm` is empty (no pwmchip, no POEG driver) | unit-map g6; doc07 §24; ✅ Verified on the board (transcript: live/ch04-reserved-mem.txt) |
+| Board status | `/sys/class/pwm` is empty (no pwmchip, no POEG driver) | unit-map 06; doc07 §24; ✅ Verified on the board (transcript: live/ch04-reserved-mem.txt) |
 
 ### When You'd Actually Use This
 
@@ -374,7 +374,7 @@ WDT also has an advanced **window** feature: you can configure a time window of 
 ### How You See This Under Linux
 
 - **Only WDT1 (the one bound to CA55) is exposed under Linux**: device node `/dev/watchdog0`, driver `rzv2h_wdt` (kernel source `drivers/watchdog/rzv2h_wdt.c`), using the standard Linux watchdog ioctl API (`WDIOC_*`). (doc07 §22)
-- **WDT0 (CM33) and WDT2/WDT3 (CR8 core0/1) aren't managed by Linux**: they belong to the respective firmware running on those cores; Linux can't see them or control them. (unit-map g6: "WDT0/2/3 belong to the CM33/CR8 firmware")
+- **WDT0 (CM33) and WDT2/WDT3 (CR8 core0/1) aren't managed by Linux**: they belong to the respective firmware running on those cores; Linux can't see them or control them. (unit-map 06: "WDT0/2/3 belong to the CM33/CR8 firmware")
 - **Tools and usage**:
 
 ```bash
@@ -406,13 +406,13 @@ printf 'V' >&3; exec 3>&- # writing 'V' is the "magic close" — gracefully disa
 | Timeout period options | 1024/4096/8192/16384 post-divider clock cycles | r01uh1032 §5.4.2.2.2 |
 | Window start/end | Start 25%/50%/75%/100% (no start restriction); end 75%/50%/25%/0% (no end restriction) | r01uh1032 §5.4.2.2.2 |
 | Core mapping and bases | `<WDT0_base>` = `0x11C0_0400` (CM33), `<WDT1_base>` = `0x1440_0000` (CA55), `<WDT2_base>` = `0x1300_0000` (CR8 Core0), `<WDT3_base>` = `0x1300_0400` (CR8 Core1) | r01uh1032 §5.4.2 Table 5.4-2 |
-| Linux exposure | Only WDT1 = `/dev/watchdog0` (`rzv2h_wdt`); WDT0/2/3 belong to their respective core's firmware | doc07 §22; unit-map g6 |
+| Linux exposure | Only WDT1 = `/dev/watchdog0` (`rzv2h_wdt`); WDT0/2/3 belong to their respective core's firmware | doc07 §22; unit-map 06 |
 
 ### Hands-On: Open It and Feed It, Read Out the Timeout, and Watch It Actually Bite (Reset)
 
 This is one of the few units in this group where you can walk the **entire path** from Linux — arming it, feeding it, and letting it genuinely reset the whole board. And precisely because the last step **really does reboot the board**, think each step through before you run it.
 
-**Mechanism**: the Linux watchdog convention is that **the moment you open `/dev/watchdog0`, the countdown starts** (arming); from then on, writing any byte to that fd counts as one "refresh" (feeding the dog) and reloads the countdown; the only clean way to stop it is to write the magic close character `V` and then close the fd. On the hardware side this is exactly the `WDTRR` refresh and the underflow reset described in section 6: miss a feed, the counter reaches 0, and WDT1 reboots the chip through the **WDT → ICU → CPG reset chain** (see [g5-system-backbone-interrupts-clocks-power-dma-event-link.md](g5-system-backbone-interrupts-clocks-power-dma-event-link.md) §1, ICU).
+**Mechanism**: the Linux watchdog convention is that **the moment you open `/dev/watchdog0`, the countdown starts** (arming); from then on, writing any byte to that fd counts as one "refresh" (feeding the dog) and reloads the countdown; the only clean way to stop it is to write the magic close character `V` and then close the fd. On the hardware side this is exactly the `WDTRR` refresh and the underflow reset described in section 6: miss a feed, the counter reaches 0, and WDT1 reboots the chip through the **WDT → ICU → CPG reset chain** (see [05-system-backbone-interrupts-clocks-power-dma-event-link.md](05-system-backbone-interrupts-clocks-power-dma-event-link.md) §1, ICU).
 
 **Step 1: confirm the device is there — but don't touch `/dev/watchdog0` yet.** (✅ Verified on the board; transcript: `live/ch4-w1-wdt-pre.txt`)
 
@@ -550,7 +550,7 @@ All three of these events can be output directly to the ELC (without going throu
 ### How You See This Under Linux
 
 - **Device node `/dev/rtc0`**, driver binding name `rtca3` (the Renesas RTCA-3 binding), using the standard Linux RTC ioctl API (`RTC_RD_TIME`, `RTC_ALM_SET`, `RTC_WKALM_SET`, `RTC_AIE_ON`). (doc07 §23)
-- **Board status**: `hwclock -r` works. (unit-map g6; doc07 §23)
+- **Board status**: `hwclock -r` works. (unit-map 06; doc07 §23)
 - **Tools and usage**:
 
 ```bash
@@ -577,8 +577,8 @@ rtcwake -d rtc0 -m mem -s 60      # sets an RTC alarm, suspends to RAM, auto-wak
 | Alarm comparison granularity | In calendar mode, year/month/day/day-of-week/hour/minute/second can each be individually selected for comparison | r01uh1032 §5.3.1 Table 5.3-1(2/2) |
 | Periodic period | 2 seconds, 1 second, 1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/128 second — 9 settings total | r01uh1032 §5.3.1 |
 | Register bases | `<RTC_base>` = `0x11C0_0800` (read/write), `<RTC_Read_Only_base>` = `0x11C0_0C00` (read-only mirror) | r01uh1032 §5.3.2 Table 5.3-3 |
-| Instance count | A single instance (unlike WDT/GTM, no multiple channels) | unit-map g6; doc07 §23 |
-| Linux exposure | `/dev/rtc0` (`rtca3`); `hwclock -r` works | doc07 §23; unit-map g6 |
+| Instance count | A single instance (unlike WDT/GTM, no multiple channels) | unit-map 06; doc07 §23 |
+| Linux exposure | `/dev/rtc0` (`rtca3`); `hwclock -r` works | doc07 §23; unit-map 06 |
 
 ### Hands-On: Read the RTC, See How It Relates to the System Clock and to NTP, and What Happens After a Power Loss
 

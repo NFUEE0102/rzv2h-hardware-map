@@ -1,4 +1,4 @@
-# g5 · System Backbone (Interrupts/Clocks/Power/DMA/Event Link)
+# 05 · System Backbone (Interrupts/Clocks/Power/DMA/Event Link)
 
 This is the **group deep-dive reference file** for Chapter 4, "Full-Board Hardware Resource Map" — it lays out, one by one, the five units in the resource map's "system backbone" group. It's an extension of the overview (file 00, 4.1): the overview only gives you a one-sentence placement for each, while this file gives you the mechanism, the Linux interface, the boundaries of its capability, and the decision rules for "when you'd actually use this."
 
@@ -272,7 +272,7 @@ sudo sh -c 'echo freeze > /sys/power/state'
 
 This step is deliberately **not** demonstrated here (⏸), for a mechanical reason: on a **remote board with nobody sitting beside it**, going to sleep with no wake source arranged in advance drops the SSH session, leaves no keyboard or physical button to call it back, and in the worst case needs **somebody on site to power-cycle it** before it comes back. That is exactly the kind of irreversible, high-cost operation you shouldn't trigger casually on a shared host.
 
-To run it safely, line up a **wake event that is guaranteed to happen** before you sleep, rather than letting the board sleep into a state that needs human intervention. In principle the most robust approach is an RTC alarm as the wake source (the RTC sits in the never-powered-down PD_AWO domain and keeps counting through deep sleep — see the power-domain table above and "RTC" in [g6-timing-system-timers-pwm.md](g6-timing-system-timers-pwm.md)):
+To run it safely, line up a **wake event that is guaranteed to happen** before you sleep, rather than letting the board sleep into a state that needs human intervention. In principle the most robust approach is an RTC alarm as the wake source (the RTC sits in the never-powered-down PD_AWO domain and keeps counting through deep sleep — see the power-domain table above and "RTC" in [06-timing-system-timers-pwm.md](06-timing-system-timers-pwm.md)):
 
 ```bash
 # Example: sleep for 30 seconds, then let the RTC wake it. Always do this from the serial console (CN8)
@@ -408,7 +408,7 @@ ICU_EVTSEL0 = EVENT_GPT_U0_CMPA;   // Select output port 0's event source as the
 
 - **The ELC's (inside the ICU) registers sit in the ICU address space**, base `0x1040_0000`; the event output selection registers `ICU_EVTSEL0`–`ICU_EVTSEL14` all have an initial value of `3FFF_FFFFh` (p805, read directly from the register listing).
 - **The PFC-side ELC** (the `PFC_ELC_GPIO` family) has its base in the PFC address space. **Honest note**: the PFC base `0x10410000` is transcribed from doc07 §13; this group's notes never directly turned to the page listing that base address, so it's secondhand.
-- **ELC cross-references on the GPT/CMTW/WDT side**: the GPT's ELC events are in Manual §5.7.6.1/§5.7.6.2, CMTW is in §5.6.5.1, and WDT→ELC is in §5.4.4. These are the cross-reference pointers listed by doc07 §13; this group's notes did **not open and check each page** against the original text one by one — left for the timer group's (g6) deep dive, or for later verification, to look up.
+- **ELC cross-references on the GPT/CMTW/WDT side**: the GPT's ELC events are in Manual §5.7.6.1/§5.7.6.2, CMTW is in §5.6.5.1, and WDT→ELC is in §5.4.4. These are the cross-reference pointers listed by doc07 §13; this group's notes did **not open and check each page** against the original text one by one — left for the timer group's (06) deep dive, or for later verification, to look up.
 
 ### When You'd Actually Use This
 
@@ -441,7 +441,7 @@ Following the principle of "unit chart format, functional-overview pages only, n
 1. **GIC-600 register block base** (`0x14900000`) — opened and corrected against the official Manual's §1.8 Address Map (p167) and §4.6.2.2 (p961) (in doc07 §10's earlier transcription of `0x14800000`/GICR `0x14840000`, `0x14800000` is actually the SRAM2(REG) region); the GICD/GICR sub-frame offsets still point to the Arm GIC-600 TRM — the Manual doesn't list them frame-by-frame.
 2. **CPG base address** (`0x1042_0000`) — transcribed from doc07 §11 (the Manual's Table 4.4-4 register-detail page was not read).
 3. **PFC-side ELC base address** (`0x10410000`) — transcribed from doc07 §13.
-4. **ELC cross-reference sections on the GPT/CMTW/WDT side** (§5.7.6.1/§5.7.6.2, §5.6.5.1, §5.4.4) — transcribed from the page-number pointers in doc07 §13; left for the g6 timer group, or later deep-dive verification, to check.
+4. **ELC cross-reference sections on the GPT/CMTW/WDT side** (§5.7.6.1/§5.7.6.2, §5.6.5.1, §5.4.4) — transcribed from the page-number pointers in doc07 §13; left for the 06 timer group, or later deep-dive verification, to check.
 5. **MHU (Message Handling Unit)** — the Manual's §4.6 title page mentions that this chapter covers the ICU/GIC/MHU together, but the MHU isn't among this group's five listed units, so it isn't expanded on here. The only place it turns up is in the PMU's power-domain table (p793), where the MHU is listed as its own separate entry under the PD_AWO domain — confirming it really is a separate IP, though its functional details are outside this group's scope.
 
 All other citations (DMAC channel count, active on-board interrupts, the two `/dev/dma_heap` accounts, PLL division values, suspend states, and so on) all come from the full text of doc06/doc07 and from verification on the board, and each has its source attached at point of use.

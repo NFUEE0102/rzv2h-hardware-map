@@ -47,17 +47,17 @@ one of these six, and each file tells you which one and why.
 |---|---|
 | [00-overview-and-ip-enablement-map.md](00-overview-and-ip-enablement-map.md) | Whole-board overview: the enablement map, how to read "enabled/disabled" counts without being misled by them, the six-state taxonomy in full, grouped summary tables, reserved memory, the clock tree |
 | [01-compute-units.md](01-compute-units.md) | The CPU/GPU/accelerator complex: 4× Cortex-A55, Cortex-M33, 2× Cortex-R8, Mali-G31 GPU, DRP-AI3 |
-| [g2-video-capture-codec-display.md](g2-video-capture-codec-display.md) | Camera capture (CRU/CSI-2), video codec, display output |
-| [g3-audio-subsystem.md](g3-audio-subsystem.md) | Audio I/O and DSP |
-| [g4-memory-and-storage.md](g4-memory-and-storage.md) | LPDDR4/4X, xSPI flash, eMMC, MTD layout |
-| [g5-system-backbone-interrupts-clocks-power-dma-event-link.md](g5-system-backbone-interrupts-clocks-power-dma-event-link.md) | Interrupt controller, clock/power generation, DMA, event link |
-| [g6-timing-system-timers-pwm.md](g6-timing-system-timers-pwm.md) | Timers (GTM/OSTM) and PWM generation |
-| [g7-communication-and-sensing-interfaces.md](g7-communication-and-sensing-interfaces.md) | Serial (UART/I2C/SPI), buses, networking (GbE/PCIe), expansion, analog |
-| [g8-debug-and-security.md](g8-debug-and-security.md) | CoreSight debug/trace, TrustZone + TZC-400, Trusted Secure IP, OTP |
-| [99-official-documentation-guide.md](99-official-documentation-guide.md) | Where to find the answer in Renesas's own documents when this map isn't enough |
+| [02-video-capture-codec-display.md](02-video-capture-codec-display.md) | Camera capture (CRU/CSI-2), video codec, display output |
+| [03-audio-subsystem.md](03-audio-subsystem.md) | Audio I/O and DSP |
+| [04-memory-and-storage.md](04-memory-and-storage.md) | LPDDR4/4X, xSPI flash, eMMC, MTD layout |
+| [05-system-backbone-interrupts-clocks-power-dma-event-link.md](05-system-backbone-interrupts-clocks-power-dma-event-link.md) | Interrupt controller, clock/power generation, DMA, event link |
+| [06-timing-system-timers-pwm.md](06-timing-system-timers-pwm.md) | Timers (GTM/OSTM) and PWM generation |
+| [07-communication-and-sensing-interfaces.md](07-communication-and-sensing-interfaces.md) | Serial (UART/I2C/SPI), buses, networking (GbE/PCIe), expansion, analog |
+| [08-debug-and-security.md](08-debug-and-security.md) | CoreSight debug/trace, TrustZone + TZC-400, Trusted Secure IP, OTP |
+| [09-official-documentation-guide.md](09-official-documentation-guide.md) | Where to find the answer in Renesas's own documents when this map isn't enough |
 
 Read `00` first — it defines the vocabulary and conventions every other file
-relies on. After that, the `g2`–`g8` files are independent; read whichever
+relies on. After that, the `02`–`08` files are independent; read whichever
 subsystem you're about to touch.
 
 ## What's *not* in this repo
@@ -76,7 +76,7 @@ this map draws a hard, honest line between "I read this myself" and
 
 The official Renesas documents themselves (`r01uh1032` hardware manual,
 `r01ds0429` datasheet) are not included — they're Renesas's copyrighted
-material. `99-official-documentation-guide.md` tells you what to look for
+material. `09-official-documentation-guide.md` tells you what to look for
 and where.
 
 ## Source and sync status

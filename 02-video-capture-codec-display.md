@@ -1,4 +1,4 @@
-# g2 · Video Capture, Codec & Display
+# 02 · Video Capture, Codec & Display
 
 This is a **group reference file** under the "Full-Board Hardware Resource Map" chapter — it lays out, one by one, the seven hardware units that make up the entire video pipeline on the RZ/V2H (part number R9A09G057H44GBG), from "the camera turning light into data" all the way to "the picture showing up on a screen." This chapter's file 00 (4.1 Overview) and file 01 (4.2 Compute Units) give you the whole-board quick-orientation view. What you get here is **the mechanism, Linux interface, capability boundaries, and decision rules for each individual unit**. When you need to decide "how should the camera be hooked up, which piece of hardware should do the scaling, should you use hardware encoding, how does the picture get output to a screen," the answers are here.
 

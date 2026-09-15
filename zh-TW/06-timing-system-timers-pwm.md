@@ -1,4 +1,4 @@
-# g6 · 計時系統（計時器／PWM）
+# 06 · 計時系統（計時器／PWM）
 
 RZ/V2H 這片 SoC（system on chip，把處理器、記憶體控制器、各種周邊全塞進一顆晶片）裡，「會數時間」的硬體不只一種。官方硬體手冊把它們集中收在 SECTION 5 TIMER 底下，本群組就對應這一整節：系統時基、看門狗、通用計時器、比較匹配計時器、通用型計時器（也是唯一能輸出 PWM 波形的那顆）、PWM 輸出閘控，以及即時時鐘。
 
@@ -115,7 +115,7 @@ cat /proc/interrupts | grep arch_timer
 ### Linux 下怎麼看到它
 
 - **驅動程式**：`renesas_ostm`（核心原始碼 `drivers/clocksource/renesas-ostm.c`）。它被繫結為核心的 **clockevent／clocksource** 提供者——clocksource 是核心用來讀「現在時間」的計時來源，clockevent 是核心用來排定「在某個時間點觸發一個事件」（例如排程器的下一個 tick）的計時器。它**不是** `/dev` 字元裝置，也**沒有** ioctl 介面（ioctl 是使用者空間對裝置節點下控制指令的系統呼叫）。（doc07 §19，逐字：「bound as a clockevent/clocksource — NOT a /dev character device. It has no userspace ioctl interface」）
-- **板上狀態**：至少一個通道被核心徵用為系統的 clockevent 裝置（驅動核心排程 tick），其餘通道由核心／韌體管理，不對應用層開放。（unit-map g6：「啟用且核心主動使用（`renesas_ostm` clockevent）」）
+- **板上狀態**：至少一個通道被核心徵用為系統的 clockevent 裝置（驅動核心排程 tick），其餘通道由核心／韌體管理，不對應用層開放。（unit-map 06：「啟用且核心主動使用（`renesas_ostm` clockevent）」）
 - **觀察方式**：
 
 ```bash
@@ -178,7 +178,7 @@ CMTW（Compare Match Timer W）共 8 個通道，實際結構是 **4 通道 × 2
 ### Linux 下怎麼看到它
 
 - **驅動程式**：`rz_cmtw`（Renesas RZ CMTW clock-event／clocksource 驅動程式），繫結為核心計時器，**不是** `/dev` 節點，無 ioctl 介面。（doc07 §20，逐字：「bound as a kernel timer, NOT a /dev node」）
-- **板上狀態**：核心已載入此驅動程式作為輔助時脈來源，但**未曝露為應用層裝置**。（unit-map g6：「啟用（`rz_cmtw` clockevent，未曝露為應用層裝置）」）
+- **板上狀態**：核心已載入此驅動程式作為輔助時脈來源，但**未曝露為應用層裝置**。（unit-map 06：「啟用（`rz_cmtw` clockevent，未曝露為應用層裝置）」）
 - **觀察方式**：
 
 ```bash
@@ -239,7 +239,7 @@ GPT 之所以能做「有品質」的功率控制波形，關鍵在幾個機制�
 
 這是本群組最需要誠實講清楚的一顆：**GPT 在本板的 Linux 使用者空間，沒有可用的操作路徑。**
 
-- **板上狀態（開發紀錄）**：16 個 `gpt@…` device tree 節點裡，只有 `gpt@13010000`（GPT0，涵蓋 ch0–7）是 `okay`，其餘 15 個節點全部 `disabled`；而且**沒有 PWM chip 註冊**。（unit-map g6；doc07 §18，逐字：「No PWM chip is registered for it」；✅ 2026-07-18 板上逐一確認 16 個節點只有 `gpt@13010000` 為 `okay`，transcript：live/ch04b-dt-status.txt）
+- **板上狀態（開發紀錄）**：16 個 `gpt@…` device tree 節點裡，只有 `gpt@13010000`（GPT0，涵蓋 ch0–7）是 `okay`，其餘 15 個節點全部 `disabled`；而且**沒有 PWM chip 註冊**。（unit-map 06；doc07 §18，逐字：「No PWM chip is registered for it」；✅ 2026-07-18 板上逐一確認 16 個節點只有 `gpt@13010000` 為 `okay`，transcript：live/ch04b-dt-status.txt）
 - **沒有標準 Linux PWM 路徑**：`/sys/class/pwm` 目錄存在但為空——沒有 `pwm-rzv2h`／`pwm-rzg2l` 驅動程式綁定到 `gpt@13010000`。雖然 DT 節點探測到了時脈／reset，但沒有曝露任何 `/dev` 或 sysfs 控制給應用層（doc07 §18，逐字：「Effectively 'no Linux driver' for application use; counting/PWM must be driven bare-metal via MMIO」；✅ 2026-07-17 板上實測 `/sys/class/pwm` 為空（transcript：live/ch04-reserved-mem.txt））。
 - **確認方式**：
 
@@ -291,7 +291,7 @@ ls -A /sys/class/pwm | wc -l    # 應印 0
 | 時脈來源 | `clks_gpt` 及其 `/2 /4 /8 /16 /32 /64 /256 /1024` 分頻，或外部觸發 `GTETRGA`–`GTETRGH` | r01uh1032 §5.7.1.1 Table 5.7-2(1/2) |
 | 特色機制 | 雙緩衝、不對稱 PWM、dead time 產生、ADC 轉換觸發、13 種中斷來源 | r01uh1032 §5.7.1.1 |
 | 暫存器基底 | `<GPT0_base>`＝`0x1301_0000`（ch0–7）、`<GPT1_base>`＝`0x1302_0000`（ch8–15） | r01uh1032 §5.7.2 Table 5.7-4 |
-| 板上可用範圍 | 僅 `gpt@13010000`（GPT0 ch0–7）DT `okay`，其餘 15 節點 `disabled`；**無 PWM chip 註冊** | unit-map g6；doc07 §18；✅ 2026-07-18 板上逐一確認（transcript：live/ch04b-dt-status.txt） |
+| 板上可用範圍 | 僅 `gpt@13010000`（GPT0 ch0–7）DT `okay`，其餘 15 節點 `disabled`；**無 PWM chip 註冊** | unit-map 06；doc07 §18；✅ 2026-07-18 板上逐一確認（transcript：live/ch04b-dt-status.txt） |
 
 > ⚠️ **注意（區分「矽片理論上限」與「本板 Linux 可用範圍」）**：手冊講的是矽片能力（16 通道、每通道 4 接腳），本板 device tree 目前只有 GPT0 ch0–7 這 8 個通道的節點是 `okay`、且無 PWM chip。引用 GPT 能力時務必分清這兩層，別讓讀者誤以為 16 通道／64 路輸出在本板 Linux 下都能直接用。
 
@@ -314,7 +314,7 @@ ls -A /sys/class/pwm | wc -l    # 應印 0
 
 ### 這是什麼（機制）
 
-先把最容易誤會的觀念講清楚：**PWM 在 RZ/V2H 上不是一個獨立的周邊。** 開發紀錄明確標註「PWM-output — NOT a standalone peripheral on RZ/V2H」——PWM 波形產生的邏輯完全在 GPT（§5.7），而 POEG（§5.8）只負責「輸出接腳要不要放行」這一層。兩者合起來才構成一條完整的 PWM 輸出鏈。（doc07 §24；unit-map g6）
+先把最容易誤會的觀念講清楚：**PWM 在 RZ/V2H 上不是一個獨立的周邊。** 開發紀錄明確標註「PWM-output — NOT a standalone peripheral on RZ/V2H」——PWM 波形產生的邏輯完全在 GPT（§5.7），而 POEG（§5.8）只負責「輸出接腳要不要放行」這一層。兩者合起來才構成一條完整的 PWM 輸出鏈。（doc07 §24；unit-map 06）
 
 POEG（Port Output Enable for GPT，GPT 埠輸出致能）本身不是計時器、不計數——它是 GPT 輸出接腳的一道**保護閘**：可以把 GPT 的輸出接腳切到停用（disable）狀態。它存在的理由是「故障安全」：萬一 PWM 因程式錯誤讓功率級進入危險狀態，POEG 能在硬體層面立刻切斷輸出，不必等 CPU 反應。（r01uh1032 §5.8.1）
 
@@ -347,7 +347,7 @@ POEG 依 GPT0／GPT1 各分 4 組，共 8 組，每組各自獨立閘控：POEG0
 | 每群組暫存器 | 一個 32-bit 控制暫存器 `POEG_POEGGn`，offset `0x0000` | r01uh1032 §5.8.2.1 |
 | 暫存器基底 | POEG0A＝`0x1300_1C00`、0B＝`0x1300_2000`、0C＝`0x1300_2400`、0D＝`0x1300_2800`、POEG1A(E)＝`0x1300_2C00`、1B(F)＝`0x1300_3000`、1C(G)＝`0x1300_3400`、1D(H)＝`0x1300_3800` | r01uh1032 §5.8.2 Table 5.8-3 |
 | 理論最大輸出 | 最多 64 路 PWM-capable 輸出（4 接腳 × 16 通道，官方規格推算，**非本板實測**） | doc07 §24 |
-| 板上狀態 | `/sys/class/pwm` 為空（無 pwmchip、無 POEG 驅動程式） | unit-map g6；doc07 §24；✅ 2026-07-17 板上實測（transcript：live/ch04-reserved-mem.txt） |
+| 板上狀態 | `/sys/class/pwm` 為空（無 pwmchip、無 POEG 驅動程式） | unit-map 06；doc07 §24；✅ 2026-07-17 板上實測（transcript：live/ch04-reserved-mem.txt） |
 
 ### 什麼情況下你會用到它
 
@@ -381,7 +381,7 @@ WDT 還有一個進階的 **window 功能**：可以設定一段「允許刷新�
 ### Linux 下怎麼看到它
 
 - **只有 WDT1（綁 CA55 的那顆）在 Linux 下曝露**：裝置節點 `/dev/watchdog0`，驅動程式 `rzv2h_wdt`（核心原始碼 `drivers/watchdog/rzv2h_wdt.c`），走標準 Linux watchdog ioctl API（`WDIOC_*`）。（doc07 §22）
-- **WDT0（CM33）與 WDT2／WDT3（CR8 core0/1）不歸 Linux 管**：它們屬於那些核心各自的韌體管轄，Linux 看不到、也控制不了。（unit-map g6：「WDT0/2/3 屬 CM33/CR8 韌體」）
+- **WDT0（CM33）與 WDT2／WDT3（CR8 core0/1）不歸 Linux 管**：它們屬於那些核心各自的韌體管轄，Linux 看不到、也控制不了。（unit-map 06：「WDT0/2/3 屬 CM33/CR8 韌體」）
 - **工具與用法**：
 
 ```bash
@@ -412,13 +412,13 @@ printf 'V' >&3; exec 3>&- # 寫 'V' 為「magic close」優雅解除武裝，再
 | 逾時週期選項 | 1024／4096／8192／16384 個分頻後時脈週期 | r01uh1032 §5.4.2.2.2 |
 | Window 起始／結束 | 起始 25%/50%/75%/100%（不指定起點）；結束 75%/50%/25%/0%（不指定終點） | r01uh1032 §5.4.2.2.2 |
 | 核心對應與基底 | `<WDT0_base>`＝`0x11C0_0400`（CM33）、`<WDT1_base>`＝`0x1440_0000`（CA55）、`<WDT2_base>`＝`0x1300_0000`（CR8 Core0）、`<WDT3_base>`＝`0x1300_0400`（CR8 Core1） | r01uh1032 §5.4.2 Table 5.4-2 |
-| Linux 曝露 | 僅 WDT1＝`/dev/watchdog0`（`rzv2h_wdt`）；WDT0/2/3 屬各核心韌體 | doc07 §22；unit-map g6 |
+| Linux 曝露 | 僅 WDT1＝`/dev/watchdog0`（`rzv2h_wdt`）；WDT0/2/3 屬各核心韌體 | doc07 §22；unit-map 06 |
 
 ### 動手：開檔餵狗、讀出 timeout、看它真的咬下去（bite 重置）
 
 這一顆是本群組少數能在 Linux 下「整條路徑走到底」的單元——從武裝、餵狗、到讓它真的重置整片板子，都能實測。但也因為它會**真的把板子重開機**，每一步都要先想清楚後果。
 
-**機制**：Linux watchdog 的約定是「**開啟 `/dev/watchdog0` 的那一刻就開始倒數**」（武裝）；之後只要往這個 fd 寫入任一位元組就算一次「刷新」（餵狗），把倒數歸位；停下看門狗的唯一乾淨方式，是寫入 magic close 字元 `V` 再關閉 fd。硬體端對應的就是第 6 節講的 `WDTRR` 刷新與 underflow（下溢）重置：餵不到、數到 0，WDT1 就經 **WDT → ICU → CPG 重置鏈**（見 g5〈系統骨幹〉第 1 節 ICU）把晶片重開。
+**機制**：Linux watchdog 的約定是「**開啟 `/dev/watchdog0` 的那一刻就開始倒數**」（武裝）；之後只要往這個 fd 寫入任一位元組就算一次「刷新」（餵狗），把倒數歸位；停下看門狗的唯一乾淨方式，是寫入 magic close 字元 `V` 再關閉 fd。硬體端對應的就是第 6 節講的 `WDTRR` 刷新與 underflow（下溢）重置：餵不到、數到 0，WDT1 就經 **WDT → ICU → CPG 重置鏈**（見 05〈系統骨幹〉第 1 節 ICU）把晶片重開。
 
 **第 1 步：確認裝置在，但先別碰 `/dev/watchdog0`。**（✅ 2026-07-22 板上實測，transcript：`live/ch4-w1-wdt-pre.txt`）
 
@@ -555,7 +555,7 @@ RTC（Realtime Clock，即時時鐘）本 SoC 的型號是 RTCA-3。它和前面
 ### Linux 下怎麼看到它
 
 - **裝置節點 `/dev/rtc0`**，驅動程式繫結名稱 `rtca3`（Renesas RTCA-3 binding），走標準 Linux RTC ioctl API（`RTC_RD_TIME`、`RTC_ALM_SET`、`RTC_WKALM_SET`、`RTC_AIE_ON`）。（doc07 §23）
-- **板上狀態**：已驗證 `hwclock -r` 可正常運作。（unit-map g6；doc07 §23）
+- **板上狀態**：已驗證 `hwclock -r` 可正常運作。（unit-map 06；doc07 §23）
 - **工具與用法**：
 
 ```bash
@@ -582,8 +582,8 @@ rtcwake -d rtc0 -m mem -s 60      # 設 RTC 鬧鐘，休眠到 RAM，60 秒後�
 | Alarm 比對粒度 | calendar mode 下年／月／日／星期／時／分／秒可個別選擇比對 | r01uh1032 §5.3.1 Table 5.3-1(2/2) |
 | Periodic 週期 | 2 秒、1 秒、1/2、1/4、1/8、1/16、1/32、1/64、1/128 秒共 9 檔 | r01uh1032 §5.3.1 |
 | 暫存器基底 | `<RTC_base>`＝`0x11C0_0800`（可讀寫）、`<RTC_Read_Only_base>`＝`0x11C0_0C00`（唯讀鏡射） | r01uh1032 §5.3.2 Table 5.3-3 |
-| 實例數 | 單一實例（不像 WDT／GTM 有多通道） | unit-map g6；doc07 §23 |
-| Linux 曝露 | `/dev/rtc0`（`rtca3`）；`hwclock -r` 可運作 | doc07 §23；unit-map g6 |
+| 實例數 | 單一實例（不像 WDT／GTM 有多通道） | unit-map 06；doc07 §23 |
+| Linux 曝露 | `/dev/rtc0`（`rtca3`）；`hwclock -r` 可運作 | doc07 §23；unit-map 06 |
 
 ### 動手：讀 RTC、看它與系統時鐘／NTP 的關係，以及斷電後會發生什麼
 

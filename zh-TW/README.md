@@ -43,20 +43,20 @@
 |---|---|
 | [00-總覽與IP啟用地圖](00-overview-and-ip-enablement-map.md) | 全板總覽：啟用地圖、怎麼讀「啟用／停用」的數字才不會被它誤導、完整的六格狀態分類、分群總表、記憶體保留區、時脈樹 |
 | [01-運算單元](01-compute-units.md) | CPU／GPU／加速器叢集：4× Cortex-A55、Cortex-M33、2× Cortex-R8、Mali-G31 GPU、DRP-AI3 |
-| [g2-影像擷取・編解碼與顯示](g2-video-capture-codec-display.md) | 相機擷取（CRU／CSI-2）、視訊編解碼、顯示輸出 |
-| [g3-音訊子系統](g3-audio-subsystem.md) | 音訊輸出入與 DSP |
-| [g4-記憶體與儲存](g4-memory-and-storage.md) | LPDDR4／4X、xSPI flash、eMMC、MTD 配置 |
-| [g5-系統骨幹（中斷／時脈／電源／DMA／事件連結）](g5-system-backbone-interrupts-clocks-power-dma-event-link.md) | 中斷控制器、時脈／電源產生、DMA、事件連結 |
-| [g6-計時系統（計時器／PWM）](g6-timing-system-timers-pwm.md) | 計時器（GTM／OSTM）與 PWM 產生 |
-| [g7-通訊與感測介面（序列／匯流排／網路／擴充／類比）](g7-communication-and-sensing-interfaces.md) | 序列（UART／I2C／SPI）、匯流排、網路（GbE／PCIe）、擴充、類比 |
-| [g8-除錯與安全](g8-debug-and-security.md) | CoreSight 除錯／追蹤、TrustZone ＋ TZC-400、Trusted Secure IP、OTP |
-| [99-官方文件查閱指路](99-official-documentation-guide.md) | 當這份地圖不夠用時，該去 Renesas 自家的哪份文件、哪一章找答案 |
+| [02-影像擷取・編解碼與顯示](02-video-capture-codec-display.md) | 相機擷取（CRU／CSI-2）、視訊編解碼、顯示輸出 |
+| [03-音訊子系統](03-audio-subsystem.md) | 音訊輸出入與 DSP |
+| [04-記憶體與儲存](04-memory-and-storage.md) | LPDDR4／4X、xSPI flash、eMMC、MTD 配置 |
+| [05-系統骨幹（中斷／時脈／電源／DMA／事件連結）](05-system-backbone-interrupts-clocks-power-dma-event-link.md) | 中斷控制器、時脈／電源產生、DMA、事件連結 |
+| [06-計時系統（計時器／PWM）](06-timing-system-timers-pwm.md) | 計時器（GTM／OSTM）與 PWM 產生 |
+| [07-通訊與感測介面（序列／匯流排／網路／擴充／類比）](07-communication-and-sensing-interfaces.md) | 序列（UART／I2C／SPI）、匯流排、網路（GbE／PCIe）、擴充、類比 |
+| [08-除錯與安全](08-debug-and-security.md) | CoreSight 除錯／追蹤、TrustZone ＋ TZC-400、Trusted Secure IP、OTP |
+| [99-官方文件查閱指路](09-official-documentation-guide.md) | 當這份地圖不夠用時，該去 Renesas 自家的哪份文件、哪一章找答案 |
 
 > **檔名說明**：本資料夾的檔名採用與英文版一一對應的 ASCII 名稱（例如
 > `00-overview-and-ip-enablement-map.md` 即中文的〈00-總覽與IP啟用地圖〉），
 > 方便兩個語言版本逐檔對照；檔案內容則是中文原稿。
 
-先讀 `00`——它定義了其他每個檔案都依賴的詞彙與慣例。之後 `g2`–`g8` 各檔互相
+先讀 `00`——它定義了其他每個檔案都依賴的詞彙與慣例。之後 `02`–`08` 各檔互相
 獨立，你要碰哪個子系統就讀哪一個。
 
 ## 這份倉庫裡**沒有**的東西
@@ -69,7 +69,7 @@ Renesas 官方硬體手冊或 datasheet 查證過的主張，引用會明講（�
 在「我自己讀過」與「別人的筆記這樣說」之間劃了一條硬性而誠實的界線。
 
 Renesas 官方文件本身（`r01uh1032` 硬體手冊、`r01ds0429` datasheet）沒有收錄
-——那是 Renesas 的著作權資料。[99-官方文件查閱指路](99-official-documentation-guide.md)
+——那是 Renesas 的著作權資料。[99-官方文件查閱指路](09-official-documentation-guide.md)
 會告訴你該找什麼、去哪裡找。
 
 ## 來源與同步狀態
